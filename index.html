@@ -1,0 +1,2258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#01010a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Space Orbit">
+<title>Space Orbit Merge Deluxe — VR</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&display=swap');
+
+  * { box-sizing: border-box; user-select: none; -webkit-user-select: none; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+  input, textarea { user-select: text; -webkit-user-select: text; touch-action: auto; }
+  html, body { margin:0; padding:0; background:#01010a; color:#fff; font-family:'Rajdhani',sans-serif; overflow:hidden; height:100dvh; width:100vw; overscroll-behavior:none; }
+
+  .font-orbitron { font-family:'Orbitron', sans-serif; }
+  .neon-border-green  { border:2px solid #00ff66; box-shadow:0 0 15px rgba(0,255,102,.4), inset 0 0 10px rgba(0,255,102,.2); }
+  .neon-border-cyan   { border:2px solid #00f0ff; box-shadow:0 0 15px rgba(0,240,255,.4), inset 0 0 10px rgba(0,240,255,.2); }
+  .neon-border-gold   { border:2px solid #ffd700; box-shadow:0 0 15px rgba(255,215,0,.4), inset 0 0 10px rgba(255,215,0,.2); }
+  .neon-border-purple { border:2px solid #a855f7; box-shadow:0 0 15px rgba(168,85,247,.4), inset 0 0 10px rgba(168,85,247,.2); }
+  .neon-text-green  { color:#00ff66; text-shadow:0 0 8px rgba(0,255,102,.8); }
+  .neon-text-gold   { color:#ffd700; text-shadow:0 0 8px rgba(255,215,0,.8); }
+  .neon-text-purple { color:#c084fc; text-shadow:0 0 8px rgba(192,132,252,.8); }
+  .neon-text-cyan   { color:#00f0ff; text-shadow:0 0 8px rgba(0,240,255,.8); }
+
+  .btn-cyber { background: linear-gradient(180deg, rgba(0,40,20,.9) 0%, rgba(0,15,8,.95) 100%); transition: all .15s ease-in-out; }
+  .btn-cyber:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 0 20px rgba(0,255,102,.8), inset 0 0 15px rgba(0,255,102,.4); border-color:#55ff99; }
+  .btn-cyber:active:not(:disabled) { transform: translateY(1px); box-shadow: 0 0 8px rgba(0,255,102,.5); }
+  .btn-cyber:disabled { opacity:.4; filter:grayscale(.8); cursor:not-allowed; }
+
+  .coin-badge { animation: pulse-glow 2s infinite alternate; }
+  @keyframes pulse-glow { 0% { box-shadow:0 0 10px rgba(0,255,102,.3); } 100% { box-shadow:0 0 20px rgba(0,255,102,.7); } }
+  .badge-purple-glow { animation: purple-pulse 2.5s infinite alternate; }
+  @keyframes purple-pulse { 0% { box-shadow:0 0 10px rgba(168,85,247,.3); } 100% { box-shadow:0 0 22px rgba(168,85,247,.8); } }
+  .planet-chip { animation: chip-float 4s ease-in-out infinite; }
+  @keyframes chip-float { 0%,100% { transform: translateY(0);} 50% { transform: translateY(-2px);} }
+  .vr-pulse { animation: vrGlow 1.8s ease-in-out infinite alternate; }
+  @keyframes vrGlow {
+    0%   { box-shadow: 0 0 8px rgba(120,80,255,.5), inset 0 0 6px rgba(120,80,255,.3); }
+    100% { box-shadow: 0 0 22px rgba(180,120,255,.95), inset 0 0 12px rgba(180,120,255,.6); }
+  }
+
+  ::-webkit-scrollbar { width:8px; height:8px; }
+  ::-webkit-scrollbar-track { background: rgba(0,20,10,.5); }
+  ::-webkit-scrollbar-thumb { background: linear-gradient(#00ff66,#00a0ff); border-radius: 4px; }
+
+  #vignette { position:absolute; inset:0; z-index:1; pointer-events:none;
+    background: radial-gradient(ellipse at center, rgba(0,0,0,0) 45%, rgba(0,0,0,.55) 100%),
+      repeating-linear-gradient(0deg, rgba(0,0,0,.10) 0px, rgba(0,0,0,.10) 1px, transparent 1px, transparent 3px);
+    mix-blend-mode: multiply; opacity:.75; }
+
+  .glass { background: rgba(3,8,16,.82); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+  .modal-shell { animation: modalIn .22s cubic-bezier(.2,.9,.3,1.3); }
+  @keyframes modalIn { from { opacity:0; transform: scale(.92) translateY(12px); } to { opacity:1; transform: scale(1) translateY(0); } }
+  .scroll-fade { mask-image: linear-gradient(to bottom, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%); }
+  .account-chip { transition: all .18s ease; }
+  .account-chip:hover { border-color:#00ff66; box-shadow: 0 0 18px rgba(0,255,102,.45); }
+  .planet-row { transition: transform .12s ease, background .12s ease; }
+  .planet-row:hover { transform: translateX(3px); }
+  .tab-btn { transition: all .15s ease; }
+  .tab-btn.active { background: rgba(0,240,255,.15); border-color:#00f0ff; color:#00f0ff; box-shadow: 0 0 12px rgba(0,240,255,.35); }
+
+  .shine { position:relative; overflow:hidden; }
+  .shine::after { content:''; position:absolute; top:0; left:-120%; width:60%; height:100%;
+    background: linear-gradient(100deg, transparent, rgba(255,255,255,.28), transparent);
+    transform: skewX(-20deg); animation: shineSweep 3.5s infinite; }
+  @keyframes shineSweep { 0% { left: -120%; } 55% { left: 160%; } 100% { left: 160%; } }
+
+  .medal-1 { background: linear-gradient(90deg, rgba(255,215,0,.22), rgba(255,215,0,.05)); border-color: #ffd700 !important; }
+  .medal-2 { background: linear-gradient(90deg, rgba(192,192,192,.20), rgba(192,192,192,.05)); border-color: #c0c0c0 !important; }
+  .medal-3 { background: linear-gradient(90deg, rgba(205,127,50,.22), rgba(205,127,50,.05)); border-color: #cd7f32 !important; }
+  .lb-row { transition: background .15s ease; }
+  .lb-row:hover { background: rgba(0,240,255,.06); }
+
+  .safe-top    { padding-top: env(safe-area-inset-top, 0); }
+  .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0); }
+
+  /* ---------- VR MODE OVERLAY ---------- */
+  #vr-overlay {
+    position: fixed; inset: 0; z-index: 9999;
+    background: #000; display: none;
+    overflow: hidden;
+    cursor: none;
+  }
+  #vr-overlay.active { display: block; }
+
+  #vr-stereo {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: row;
+  }
+  #vr-left, #vr-right {
+    flex: 1 1 50%;
+    position: relative;
+    overflow: hidden;
+    background: #01010a;
+  }
+  #vr-left canvas, #vr-right canvas {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    display: block;
+  }
+  #vr-center-divider {
+    position: absolute; top: 0; bottom: 0; left: 50%;
+    width: 2px; margin-left: -1px;
+    background: rgba(0,0,0,.85);
+    pointer-events: none; z-index: 5;
+  }
+  #vr-hud {
+    position: absolute; inset: 0; pointer-events: none;
+    z-index: 6;
+  }
+  #vr-crosshair {
+    position: absolute; top: 50%; left: 50%;
+    width: 40px; height: 40px; margin: -20px 0 0 -20px;
+    border: 2px solid rgba(0,240,255,.55);
+    border-radius: 50%;
+    box-shadow: 0 0 18px rgba(0,240,255,.6);
+    transition: opacity .3s ease;
+  }
+  #vr-crosshair::before, #vr-crosshair::after {
+    content: ''; position: absolute; background: rgba(0,240,255,.75);
+  }
+  #vr-crosshair::before { left: 50%; top: -8px; bottom: -8px; width: 2px; margin-left: -1px; }
+  #vr-crosshair::after  { top: 50%; left: -8px; right: -8px; height: 2px; margin-top: -1px; }
+
+  #vr-topbar {
+    position: absolute; top: 0; left: 0; right: 0;
+    padding: 14px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px;
+    pointer-events: auto;
+    background: linear-gradient(to bottom, rgba(0,0,0,.75), transparent);
+  }
+  #vr-topbar .vr-chip {
+    background: rgba(0,0,0,.65);
+    border: 2px solid rgba(0,240,255,.5);
+    border-radius: 14px;
+    padding: 6px 14px;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 800;
+    font-size: 13px;
+    color: #00f0ff;
+    text-shadow: 0 0 8px rgba(0,240,255,.85);
+    display: flex; align-items: center; gap: 8px;
+    backdrop-filter: blur(6px);
+  }
+  #vr-topbar .vr-chip.gold   { border-color: rgba(255,215,0,.6);  color: #ffd700; text-shadow: 0 0 8px rgba(255,215,0,.85); }
+  #vr-topbar .vr-chip.purple { border-color: rgba(168,85,247,.6); color: #c084fc; text-shadow: 0 0 8px rgba(192,132,252,.85); }
+  #vr-topbar .vr-btn {
+    background: rgba(255,20,60,.2);
+    border: 2px solid rgba(255,60,90,.75);
+    color: #ff5566;
+    border-radius: 12px;
+    padding: 8px 16px;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 800;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all .15s ease;
+    text-shadow: 0 0 6px rgba(255,60,90,.7);
+  }
+  #vr-topbar .vr-btn:hover { background: rgba(255,20,60,.4); color:#fff; }
+
+  #vr-bottom {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 12px 16px 20px;
+    display: flex; justify-content: center; align-items: center; gap: 12px;
+    flex-wrap: wrap;
+    pointer-events: auto;
+    background: linear-gradient(to top, rgba(0,0,0,.8), transparent);
+  }
+  #vr-bottom .vr-action {
+    min-width: 92px;
+    padding: 10px 14px;
+    border-radius: 16px;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 800;
+    font-size: 11px;
+    letter-spacing: .06em;
+    color: #00ff66;
+    background: rgba(0,25,12,.72);
+    border: 2px solid rgba(0,255,102,.55);
+    text-shadow: 0 0 6px rgba(0,255,102,.85);
+    cursor: pointer;
+    transition: all .15s ease;
+    backdrop-filter: blur(6px);
+  }
+  #vr-bottom .vr-action:active { transform: scale(.94); }
+  #vr-bottom .vr-action.cyan   { color:#00f0ff; border-color: rgba(0,240,255,.6);  text-shadow: 0 0 6px rgba(0,240,255,.85); }
+  #vr-bottom .vr-action.purple { color:#c084fc; border-color: rgba(168,85,247,.6); text-shadow: 0 0 6px rgba(192,132,252,.85); }
+  #vr-bottom .vr-action.gold   { color:#ffd700; border-color: rgba(255,215,0,.6);  text-shadow: 0 0 6px rgba(255,215,0,.85); }
+  #vr-bottom .vr-action:disabled { opacity:.35; }
+
+  #vr-splash {
+    position: absolute; inset: 0; z-index: 8;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 18px;
+    background: radial-gradient(ellipse at center, rgba(10,10,40,.92), rgba(0,0,0,.98));
+    color: #00f0ff;
+    text-align: center;
+    padding: 24px;
+  }
+  #vr-splash.hidden { display: none; }
+  #vr-splash h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 32px;
+    letter-spacing: .18em;
+    color: #00ff66;
+    text-shadow: 0 0 18px rgba(0,255,102,.9);
+  }
+  #vr-splash p {
+    max-width: 480px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #a0f8ff;
+  }
+  #vr-splash .vr-enter {
+    margin-top: 8px;
+    padding: 14px 28px;
+    border-radius: 20px;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 16px;
+    letter-spacing: .12em;
+    color: #000;
+    background: linear-gradient(90deg, #00ff66, #00f0ff);
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 0 30px rgba(0,255,102,.7);
+    transition: all .15s ease;
+  }
+  #vr-splash .vr-enter:hover { transform: scale(1.04); box-shadow: 0 0 45px rgba(0,255,102,1); }
+  #vr-splash .vr-cancel {
+    padding: 10px 22px;
+    border-radius: 14px;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 800;
+    font-size: 12px;
+    color: #ff6688;
+    background: rgba(60,0,20,.55);
+    border: 2px solid rgba(255,80,120,.7);
+    cursor: pointer;
+  }
+
+  #vr-toast {
+    position: absolute; top: 72px; left: 50%; transform: translateX(-50%) translateY(-14px);
+    background: rgba(0,0,0,.85);
+    border: 2px solid rgba(0,255,102,.55);
+    color: #00ff66;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 800;
+    font-size: 13px;
+    padding: 10px 20px;
+    border-radius: 999px;
+    opacity: 0;
+    transition: opacity .3s ease, transform .3s ease;
+    text-shadow: 0 0 8px rgba(0,255,102,.85);
+    z-index: 9;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  #vr-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 900px) {
+    .hud-header { gap: 6px !important; padding: 8px !important; }
+    .hud-coin { font-size: 14px !important; }
+    .hide-tiny { display: none !important; }
+  }
+</style>
+</head>
+<body class="flex items-center justify-center">
+
+<div id="game-container" class="relative w-full h-full max-w-[1400px] max-h-[900px] overflow-hidden bg-black md:rounded-2xl border-0 md:border-2 border-[#00ff66]/25 shadow-[0_0_70px_rgba(0,255,102,.15)] flex flex-col justify-between">
+
+  <canvas id="canvas" class="absolute inset-0 w-full h-full z-0"></canvas>
+  <div id="vignette"></div>
+
+  <!-- AUTH SCREEN -->
+  <div id="screen-auth" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 safe-top safe-bottom"
+       style="background: radial-gradient(ellipse at 50% 30%, #0b1030 0%, #03040e 55%, #000 100%);">
+    <div class="w-full max-w-md flex flex-col gap-4 modal-shell">
+      <div class="text-center flex flex-col items-center gap-2">
+        <div class="text-6xl">🪐</div>
+        <h1 class="font-orbitron font-black text-3xl tracking-widest neon-text-green">SPACE ORBIT</h1>
+        <p class="font-orbitron font-bold text-xs tracking-[.4em] text-cyan-300/80">MERGE&nbsp;DELUXE</p>
+        <p class="text-xs text-gray-400 mt-1">100 worlds &bull; live leaderboards &bull; VR ready</p>
+      </div>
+      <div class="glass neon-border-green rounded-3xl p-6 flex flex-col gap-3">
+        <div class="flex gap-1.5 p-1 bg-black/60 rounded-xl border border-green-500/20">
+          <button id="tab-login" class="tab-btn active flex-1 py-2 rounded-lg text-xs font-orbitron font-bold text-gray-300 border border-transparent">LOGIN</button>
+          <button id="tab-register" class="tab-btn flex-1 py-2 rounded-lg text-xs font-orbitron font-bold text-gray-300 border border-transparent">REGISTER</button>
+        </div>
+        <div>
+          <label class="text-[10px] font-bold text-green-300/80 uppercase tracking-wider">Commander Name</label>
+          <input id="auth-username" type="text" maxlength="16" autocomplete="username" placeholder="e.g. NovaPilot"
+                 class="w-full bg-black/80 border border-green-500/40 rounded-xl px-3 py-2.5 text-sm text-white mt-1 focus:outline-none focus:border-green-400" />
+        </div>
+        <div>
+          <label class="text-[10px] font-bold text-green-300/80 uppercase tracking-wider">Access Code</label>
+          <input id="auth-password" type="password" maxlength="64" autocomplete="current-password" placeholder="••••••••"
+                 class="w-full bg-black/80 border border-green-500/40 rounded-xl px-3 py-2.5 text-sm text-white mt-1 focus:outline-none focus:border-green-400" />
+        </div>
+        <div id="auth-error" class="hidden text-[11px] text-red-400 font-bold text-center bg-red-950/40 border border-red-500/40 rounded-lg py-2 px-2"></div>
+        <button id="btn-auth-submit" class="shine w-full py-3 rounded-xl font-orbitron font-black text-sm text-black bg-gradient-to-r from-green-400 via-emerald-400 to-cyan-400 hover:brightness-110 active:scale-95 transition">ENTER THE ORBIT</button>
+        <button id="btn-auth-guest" class="w-full py-2.5 rounded-xl font-orbitron font-bold text-xs text-gray-300 bg-gray-800/70 hover:bg-gray-700/80 active:scale-95 transition">PLAY AS GUEST</button>
+      </div>
+      <div class="flex items-center justify-center gap-2 text-[10px] text-gray-500">
+        <span id="server-status" class="w-2 h-2 rounded-full bg-red-500"></span>
+        <span id="server-status-text">Checking server…</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- HUD HEADER -->
+  <header class="hud-header relative z-10 w-full p-3 sm:p-4 flex items-center justify-between gap-2 pointer-events-none flex-wrap sm:flex-nowrap safe-top">
+    <div class="pointer-events-auto flex items-center gap-2.5 glass neon-border-green rounded-2xl px-4 py-2 coin-badge">
+      <div class="w-8 h-8 rounded-full bg-amber-400 border-2 border-amber-200 shadow-[0_0_10px_#ffd700] flex items-center justify-center text-black font-extrabold text-sm">$</div>
+      <div class="flex flex-col leading-none">
+        <span id="coin-count" class="hud-coin font-orbitron font-extrabold text-xl sm:text-2xl neon-text-green">100</span>
+        <span id="coin-rate" class="font-orbitron font-bold text-[10px] text-green-400/80 mt-0.5">+0/s</span>
+      </div>
+    </div>
+    <div class="pointer-events-auto flex items-center gap-3 glass neon-border-purple rounded-2xl px-4 py-2 badge-purple-glow">
+      <div class="flex items-center gap-1.5">
+        <span class="text-base">♻️</span>
+        <span class="font-orbitron font-bold text-xs sm:text-sm text-purple-300">REB: <strong id="rebirth-count-text" class="neon-text-purple">0</strong></span>
+      </div>
+      <span class="text-purple-500">•</span>
+      <div class="flex items-center gap-1.5">
+        <span class="font-orbitron font-bold text-xs sm:text-sm text-amber-300">MULT: <strong id="income-mult-text" class="neon-text-gold">1.0x</strong></span>
+      </div>
+    </div>
+    <div class="pointer-events-auto flex items-center gap-1.5 flex-wrap justify-end">
+      <div class="account-chip flex items-center gap-2 glass border border-green-500/35 rounded-xl pl-2.5 pr-1.5 py-1.5">
+        <span class="w-6 h-6 rounded-full bg-gradient-to-br from-green-400 to-cyan-500 flex items-center justify-center text-[11px] font-black text-black">👤</span>
+        <span id="account-name" class="font-orbitron font-bold text-[11px] text-green-200 max-w-[90px] truncate">GUEST</span>
+        <span id="save-status" class="text-[9px] font-orbitron font-bold text-green-400/70 hidden sm:inline"></span>
+        <button id="btn-save-now" title="Save now" class="w-7 h-7 rounded-lg bg-green-900/60 border border-green-500/50 text-green-300 text-xs hover:bg-green-500/30 active:scale-90 transition">💾</button>
+        <button id="btn-logout" title="Log out" class="w-7 h-7 rounded-lg bg-red-900/50 border border-red-500/50 text-red-300 text-xs hover:bg-red-500/30 active:scale-90 transition">⏏</button>
+      </div>
+      <div class="flex items-center gap-1.5 glass neon-border-gold rounded-xl px-3 py-2">
+        <span class="text-sm">🔑</span>
+        <span id="key-count-text" class="font-orbitron font-extrabold text-sm neon-text-gold">0</span>
+      </div>
+
+      <!-- ============ VR MODE BUTTON ============ -->
+      <button id="btn-vr" title="Enter VR Mode"
+              class="vr-pulse bg-gradient-to-r from-purple-600/40 to-cyan-500/30 border border-purple-400/80 rounded-xl px-3 py-2 hover:brightness-125 active:scale-95 transition text-purple-200 flex items-center gap-1.5 font-orbitron text-[11px] font-bold">
+        <span>🥽</span><span class="hide-tiny">VR</span>
+      </button>
+
+      <button id="btn-leaderboard" class="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-400/70 rounded-xl px-3 py-2 hover:brightness-125 active:scale-95 transition text-yellow-300 flex items-center gap-1.5 font-orbitron text-[11px] font-bold">
+        <span>🏆</span><span class="hide-tiny">RANKS</span>
+      </button>
+      <button id="btn-shop" class="bg-gradient-to-r from-amber-500/20 to-purple-500/20 border border-amber-400/80 rounded-xl px-3 py-2 hover:brightness-125 active:scale-95 transition text-amber-300 flex items-center gap-1.5 font-orbitron text-[11px] font-bold">
+        <span>🛒</span><span class="hide-tiny">ATLAS</span>
+      </button>
+      <button id="btn-turbo" class="bg-black/80 border border-amber-400/60 rounded-xl px-3 py-2 hover:bg-amber-500/20 active:scale-95 transition text-amber-400 flex items-center gap-1.5 font-orbitron text-[11px] font-bold">
+        <span id="turbo-icon" class="text-sm">⚡</span>
+        <span id="turbo-label" class="hide-tiny">FLASH</span>
+        <span id="flash-badge" class="bg-amber-500 text-black text-[9px] font-extrabold px-1.5 py-0.5 rounded-full ml-0.5 hidden">05:00</span>
+      </button>
+      <button id="btn-codex" class="bg-black/80 neon-border-cyan rounded-xl p-2.5 hover:bg-cyan-500/20 active:scale-95 transition text-cyan-400 font-bold text-sm">🛸</button>
+      <button id="btn-audio" class="bg-black/80 neon-border-green rounded-xl p-2.5 hover:bg-green-500/20 active:scale-95 transition text-green-400 font-bold text-sm">🔊</button>
+    </div>
+  </header>
+
+  <div id="center-message" class="relative z-10 pointer-events-none self-center text-center transition-all duration-300 opacity-0 transform translate-y-2">
+    <span id="center-message-text" class="font-orbitron font-extrabold text-lg sm:text-xl neon-text-green tracking-widest glass px-6 py-2 rounded-full border border-green-500/40 shadow-[0_0_30px_rgba(0,255,102,.4)]">READY</span>
+  </div>
+
+  <!-- FOOTER ACTION DECK -->
+  <footer class="relative z-10 w-full p-3 sm:p-4 flex flex-col items-center gap-3 safe-bottom">
+    <div class="flex items-center gap-2.5 sm:gap-5 glass border border-green-500/30 rounded-full px-5 py-1.5 text-[11px] sm:text-xs font-orbitron tracking-wider text-green-300 flex-wrap justify-center">
+      <span class="flex items-center gap-1.5">
+        <span id="planet-dot" class="w-3 h-3 rounded-full inline-block" style="background:#10b981;box-shadow:0 0 8px #10b981"></span>
+        PLANET: <strong id="active-planet-text" class="text-cyan-400">TERRA PRIME</strong>
+      </span>
+      <span class="text-green-600">•</span>
+      <span>UNLOCKED: <strong id="unlocked-count-text" class="text-white">1/100</strong></span>
+      <span class="text-green-600">•</span>
+      <span>SHIPS: <strong id="ship-cap-text" class="text-white">2/8</strong></span>
+      <span class="text-green-600">•</span>
+      <span>GATES: <strong id="gate-count-text" class="text-white">2</strong></span>
+    </div>
+    <div class="grid grid-cols-4 gap-2 sm:gap-4 w-full max-w-[760px]">
+      <button id="btn-merge" class="btn-cyber neon-border-green rounded-2xl p-2.5 sm:p-4 flex flex-col items-center justify-between min-h-[86px]">
+        <div class="flex items-center gap-1.5"><span class="font-orbitron font-black text-xs sm:text-sm text-green-300 tracking-wider">MERGE</span><span id="merge-ready-badge" class="bg-green-500 text-black text-[9px] font-extrabold px-1.5 rounded-full hidden">READY</span></div>
+        <div class="text-[10px] text-green-400/80 font-bold">Combine Pairs</div>
+        <div class="flex items-center gap-1 mt-1"><div class="w-3.5 h-3.5 rounded-full bg-amber-400 border border-amber-200 flex items-center justify-center text-[9px] text-black font-extrabold">$</div><span id="cost-merge" class="font-orbitron font-extrabold text-xs sm:text-sm neon-text-gold">50</span></div>
+      </button>
+      <button id="btn-ship" class="btn-cyber neon-border-green rounded-2xl p-2.5 sm:p-4 flex flex-col items-center justify-between min-h-[86px]">
+        <span class="font-orbitron font-black text-xs sm:text-sm text-green-300 tracking-wider">+1 SHIP</span>
+        <div class="text-[10px] text-green-400/80 font-bold">Spawn Cruiser</div>
+        <div class="flex items-center gap-1 mt-1"><div class="w-3.5 h-3.5 rounded-full bg-amber-400 border border-amber-200 flex items-center justify-center text-[9px] text-black font-extrabold">$</div><span id="cost-ship" class="font-orbitron font-extrabold text-xs sm:text-sm neon-text-gold">100</span></div>
+      </button>
+      <button id="btn-gate" class="btn-cyber neon-border-green rounded-2xl p-2.5 sm:p-4 flex flex-col items-center justify-between min-h-[86px]">
+        <span class="font-orbitron font-black text-xs sm:text-sm text-green-300 tracking-wider">+1 GATE</span>
+        <div class="text-[10px] text-green-400/80 font-bold">Income Gate</div>
+        <div class="flex items-center gap-1 mt-1"><div class="w-3.5 h-3.5 rounded-full bg-amber-400 border border-amber-200 flex items-center justify-center text-[9px] text-black font-extrabold">$</div><span id="cost-gate" class="font-orbitron font-extrabold text-xs sm:text-sm neon-text-gold">150</span></div>
+      </button>
+      <button id="btn-rebirth-modal" class="btn-cyber neon-border-purple rounded-2xl p-2.5 sm:p-4 flex flex-col items-center justify-between min-h-[86px]">
+        <span class="font-orbitron font-black text-xs sm:text-sm text-purple-300 tracking-wider">REBIRTH</span>
+        <div class="text-[10px] text-purple-300/80 font-bold">Quantum Reset</div>
+        <div class="text-[10px] font-orbitron font-extrabold neon-text-purple mt-1">VIEW ♻️</div>
+      </button>
+    </div>
+  </footer>
+
+  <!-- ============ VR MODE OVERLAY ============ -->
+  <div id="vr-overlay" aria-hidden="true">
+    <div id="vr-stereo">
+      <div id="vr-left">
+        <canvas id="vr-canvas-left"></canvas>
+      </div>
+      <div id="vr-right">
+        <canvas id="vr-canvas-right"></canvas>
+      </div>
+    </div>
+    <div id="vr-center-divider"></div>
+
+    <div id="vr-hud">
+      <div id="vr-crosshair"></div>
+
+      <div id="vr-topbar">
+        <div class="vr-chip">🥽 VR MODE</div>
+        <div class="vr-chip gold" id="vr-coins">$ 100</div>
+        <div class="vr-chip purple" id="vr-mult">MULT 1.0x</div>
+        <button class="vr-btn" id="vr-exit-btn">EXIT VR</button>
+      </div>
+
+      <div id="vr-toast"></div>
+
+      <div id="vr-bottom">
+        <button class="vr-action" data-vr-action="merge">MERGE</button>
+        <button class="vr-action cyan" data-vr-action="ship">+ SHIP</button>
+        <button class="vr-action cyan" data-vr-action="gate">+ GATE</button>
+        <button class="vr-action purple" data-vr-action="rebirth">REBIRTH</button>
+        <button class="vr-action gold" data-vr-action="flash">⚡ FLASH</button>
+        <button class="vr-action gold" data-vr-action="atlas">🪐 ATLAS</button>
+        <button class="vr-action" data-vr-action="ranks">🏆 RANKS</button>
+      </div>
+    </div>
+
+    <div id="vr-splash">
+      <h1>VR MODE</h1>
+      <p>Place your phone in a headset (Cardboard / cheap VR) and hold it horizontally. You'll see two eye views that combine into one immersive 3D scene. Tilt your device to look around. Use the on-screen buttons to play.</p>
+      <button class="vr-enter" id="vr-enter-btn">ENTER IMMERSION</button>
+      <button class="vr-cancel" id="vr-cancel-btn">CANCEL</button>
+    </div>
+  </div>
+
+  <!-- LEADERBOARD MODAL -->
+  <div id="modal-leaderboard" class="fixed inset-0 z-50 bg-black/88 backdrop-blur-lg hidden items-center justify-center p-3 sm:p-4 safe-top safe-bottom">
+    <div class="bg-gray-950 neon-border-gold rounded-3xl p-4 sm:p-6 max-w-2xl w-full flex flex-col gap-4 shadow-[0_0_50px_rgba(255,215,0,.3)] max-h-[92vh] overflow-hidden modal-shell">
+      <div class="flex items-center justify-between border-b border-amber-500/30 pb-3">
+        <div>
+          <h2 class="font-orbitron font-black text-lg sm:text-2xl text-amber-400 flex items-center gap-2">🏆 GALACTIC RANKINGS</h2>
+          <p class="text-[11px] text-amber-200/70" id="lb-subtitle">Local rankings</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="btn-lb-refresh" class="text-amber-300 text-sm font-orbitron font-bold px-2.5 py-1.5 rounded-lg bg-amber-900/40 border border-amber-500/40 hover:bg-amber-500/20 transition">⟳</button>
+          <button id="btn-close-leaderboard" class="text-amber-400 hover:text-white text-2xl font-extrabold px-2">✕</button>
+        </div>
+      </div>
+      <div class="flex gap-1.5 p-1 bg-black/60 rounded-xl border border-amber-500/20">
+        <button data-lbsort="coins"    class="lb-sort tab-btn active flex-1 py-2 rounded-lg text-[11px] font-orbitron font-bold text-gray-300 border border-transparent">💰 COINS</button>
+        <button data-lbsort="rebirths" class="lb-sort tab-btn flex-1 py-2 rounded-lg text-[11px] font-orbitron font-bold text-gray-300 border border-transparent">♻️ REBIRTHS</button>
+        <button data-lbsort="planets"  class="lb-sort tab-btn flex-1 py-2 rounded-lg text-[11px] font-orbitron font-bold text-gray-300 border border-transparent">🪐 PLANETS</button>
+      </div>
+      <div id="lb-list" class="flex flex-col gap-1.5 overflow-y-auto pr-1 scroll-fade max-h-[60vh]">
+        <div class="text-center text-gray-500 text-xs py-8 font-orbitron">LOADING…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ATLAS MODAL -->
+  <div id="modal-shop" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-lg hidden items-center justify-center p-2 sm:p-4 safe-top safe-bottom">
+    <div class="bg-gray-950 neon-border-gold rounded-3xl p-4 sm:p-6 max-w-2xl w-full flex flex-col gap-4 shadow-[0_0_50px_rgba(255,215,0,.3)] max-h-[92vh] overflow-hidden modal-shell">
+      <div class="flex items-center justify-between border-b border-amber-500/30 pb-3">
+        <div>
+          <h2 class="font-orbitron font-black text-lg sm:text-2xl text-amber-400 flex items-center gap-2">🛒 GALACTIC ATLAS</h2>
+          <p class="text-[11px] text-amber-200/70">Unlock 100 worlds with Planet Keys</p>
+        </div>
+        <button id="btn-close-shop" class="text-amber-400 hover:text-white text-2xl font-extrabold px-2">✕</button>
+      </div>
+      <div class="overflow-y-auto pr-1 flex flex-col gap-4 scroll-fade">
+        <div class="bg-gray-900/80 border border-green-500/40 rounded-2xl p-3 flex items-center justify-between gap-3">
+          <div>
+            <div class="font-orbitron font-bold text-[11px] text-green-300">CONVERT REBIRTHS → KEY</div>
+            <div class="text-[11px] text-gray-400">Trade 4 Rebirths for 1 Planet Key</div>
+          </div>
+          <button id="btn-craft-key" class="py-2 px-4 rounded-xl bg-green-900/60 border border-green-400 text-green-300 font-orbitron font-bold text-[11px] hover:bg-green-500/30 active:scale-95 transition disabled:opacity-40 disabled:cursor-not-allowed">CRAFT (4 ♻️)</button>
+        </div>
+        <div class="flex flex-col gap-2">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <div class="text-[11px] font-orbitron font-bold text-cyan-300 tracking-wider uppercase">🪐 100 WORLDS</div>
+            <div class="flex items-center gap-1.5">
+              <input id="planet-search" type="text" placeholder="Search…" maxlength="20"
+                     class="w-28 sm:w-40 bg-black/70 border border-cyan-500/40 rounded-lg px-2 py-1 text-[11px] text-white focus:outline-none focus:border-cyan-400" />
+              <button data-filter="all"    class="planet-filter tab-btn active px-2 py-1 rounded-lg border border-cyan-500/30 text-[10px] font-orbitron font-bold text-gray-300">ALL</button>
+              <button data-filter="owned"  class="planet-filter tab-btn px-2 py-1 rounded-lg border border-cyan-500/30 text-[10px] font-orbitron font-bold text-gray-300">OWNED</button>
+              <button data-filter="locked" class="planet-filter tab-btn px-2 py-1 rounded-lg border border-cyan-500/30 text-[10px] font-orbitron font-bold text-gray-300">LOCKED</button>
+            </div>
+          </div>
+          <div id="planets-list" class="flex flex-col gap-2 max-h-[52vh] overflow-y-auto pr-1 scroll-fade"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REBIRTH MODAL -->
+  <div id="modal-rebirth" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-lg hidden items-center justify-center p-4">
+    <div class="bg-gray-950 neon-border-purple rounded-3xl p-5 sm:p-6 max-w-md w-full flex flex-col gap-4 shadow-[0_0_50px_rgba(168,85,247,.3)] text-center modal-shell">
+      <div class="text-4xl animate-bounce">♻️</div>
+      <h2 class="font-orbitron font-black text-2xl neon-text-purple tracking-wider">QUANTUM REBIRTH</h2>
+      <p class="text-xs text-purple-200/90 leading-relaxed">Reset your fleet and coins for permanent <strong class="text-amber-400">+25% income multiplier</strong> per Rebirth.</p>
+      <div class="flex flex-col gap-2 text-left">
+        <div class="bg-black/70 border border-purple-500/40 rounded-2xl p-3 flex items-center justify-between gap-3">
+          <div>
+            <div class="font-orbitron font-bold text-[11px] text-purple-300">QUANTUM REBIRTH</div>
+            <div class="text-[11px] text-gray-400">+4 Rebirths · +1 Planet Key</div>
+          </div>
+          <button id="btn-rebirth-1m" class="py-2 px-3 rounded-xl bg-purple-600 text-white font-orbitron font-bold text-[11px] hover:bg-purple-500 active:scale-95 transition disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap">REBIRTH</button>
+        </div>
+        <div class="bg-black/70 border border-purple-500/40 rounded-2xl p-3 flex items-center justify-between gap-3">
+          <div>
+            <div class="font-orbitron font-bold text-[11px] text-fuchsia-300">DEEP REBIRTH</div>
+            <div class="text-[11px] text-gray-400">+12 Rebirths · +3 Planet Keys</div>
+          </div>
+          <button id="btn-rebirth-2m" class="py-2 px-3 rounded-xl bg-fuchsia-600 text-white font-orbitron font-bold text-[11px] hover:bg-fuchsia-500 active:scale-95 transition disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap">REBIRTH</button>
+        </div>
+      </div>
+      <button id="btn-close-rebirth" class="w-full py-2.5 rounded-xl bg-gray-800 text-gray-300 font-orbitron font-bold text-xs hover:bg-gray-700 transition">CLOSE</button>
+    </div>
+  </div>
+
+  <!-- CODEX MODAL -->
+  <div id="modal-codex" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-lg hidden items-center justify-center p-4">
+    <div class="bg-gray-950 neon-border-cyan rounded-3xl p-5 sm:p-6 max-w-lg w-full flex flex-col gap-4 shadow-[0_0_40px_rgba(0,240,255,.2)] max-h-[85vh] modal-shell">
+      <div class="flex items-center justify-between border-b border-cyan-500/30 pb-3">
+        <h2 class="font-orbitron font-black text-xl neon-text-cyan flex items-center gap-2">🛸 FLEET CODEX</h2>
+        <button id="btn-close-codex" class="text-cyan-400 hover:text-white text-xl font-extrabold px-2">✕</button>
+      </div>
+      <div id="codex-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3 overflow-y-auto pr-1 scroll-fade"></div>
+    </div>
+  </div>
+
+  <!-- FLASH MODAL -->
+  <div id="modal-flash" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-lg hidden items-center justify-center p-4">
+    <div class="bg-gray-950 neon-border-gold rounded-3xl p-5 sm:p-6 max-w-md w-full flex flex-col gap-4 shadow-[0_0_50px_rgba(255,215,0,.3)] text-center modal-shell">
+      <div class="text-4xl animate-bounce">⚡</div>
+      <h2 class="font-orbitron font-black text-2xl neon-text-gold tracking-wider">HYPER FLASH BOOST</h2>
+      <p class="text-xs text-amber-200/90 leading-relaxed">Supercharge ships with <strong class="text-amber-400">2.5x velocity</strong> for more coins per minute!</p>
+      <div class="bg-black/80 border border-cyan-500/50 rounded-2xl p-3.5 flex items-center justify-between gap-3">
+        <div class="text-left">
+          <div class="font-orbitron font-bold text-[11px] text-cyan-300 flex items-center gap-1.5">📺 WATCH SPONSOR AD <span class="bg-cyan-500/20 text-cyan-300 text-[9px] px-2 py-0.5 rounded-full border border-cyan-400/40">FREE</span></div>
+          <p class="text-[11px] text-gray-300 mt-0.5">10s video → 5 minutes of Flash.</p>
+        </div>
+        <button id="btn-watch-ad" class="py-2.5 px-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-orbitron font-extrabold text-[11px] hover:brightness-125 active:scale-95 transition whitespace-nowrap">WATCH</button>
+      </div>
+      <button id="btn-close-flash-modal" class="w-full py-2.5 rounded-xl bg-gray-800 text-gray-300 font-orbitron font-bold text-xs hover:bg-gray-700 transition">CLOSE</button>
+    </div>
+  </div>
+
+  <!-- AD MODAL -->
+  <div id="modal-ad" class="fixed inset-0 z-50 bg-black/95 backdrop-blur-2xl hidden items-center justify-center p-4">
+    <div class="bg-gray-950 border-2 border-cyan-400 rounded-3xl p-5 sm:p-6 max-w-md w-full flex flex-col items-center gap-4 shadow-[0_0_60px_rgba(0,240,255,.4)] text-center modal-shell">
+      <div class="w-full flex items-center justify-between text-xs font-orbitron font-bold text-cyan-400 border-b border-cyan-500/30 pb-2">
+        <span>📺 SPONSOR ADVERTISEMENT</span>
+        <span id="ad-timer-countdown" class="bg-cyan-900/60 border border-cyan-400 px-2.5 py-0.5 rounded-full text-white">10s</span>
+      </div>
+      <div class="relative w-full aspect-video bg-gradient-to-br from-indigo-950 via-purple-950 to-black rounded-2xl border border-cyan-500/40 flex flex-col items-center justify-center p-4">
+        <div class="flex flex-col items-center gap-2 animate-pulse">
+          <div class="text-3xl sm:text-4xl">🚀 GALACTIC COMMAND</div>
+          <p class="text-xs text-cyan-200 font-orbitron">Explore deep space in the ultimate sci-fi RPG!</p>
+          <div class="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-400 text-[10px] font-bold mt-1">Play Free Now</div>
+        </div>
+      </div>
+      <div class="w-full bg-gray-900 rounded-full h-3 border border-cyan-500/40 overflow-hidden">
+        <div id="ad-progress-bar" class="bg-gradient-to-r from-cyan-400 to-blue-500 h-full w-0 transition-all duration-300"></div>
+      </div>
+      <button id="btn-claim-ad-reward" class="w-full py-3 rounded-2xl bg-gradient-to-r from-green-500 to-emerald-400 text-black font-orbitron font-extrabold text-sm shadow-[0_0_20px_rgba(0,255,102,.5)] hover:brightness-125 transition hidden">⚡ CLAIM 5 MINUTES FLASH</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ============================================================
+   Space Orbit Merge Deluxe — Single file with VR Mode
+   ============================================================ */
+
+/* safe storage */
+(function () {
+  let ok = false;
+  try { window.localStorage.setItem('__t','1'); window.localStorage.removeItem('__t'); ok = true; } catch (e) {}
+  if (!ok) {
+    const mem = {};
+    try {
+      Object.defineProperty(window, 'localStorage', {
+        configurable: true,
+        value: {
+          getItem: k => Object.prototype.hasOwnProperty.call(mem,k) ? mem[k] : null,
+          setItem: (k,v) => { mem[k] = String(v); },
+          removeItem: k => { delete mem[k]; },
+          clear: () => { for (const k in mem) delete mem[k]; },
+          key: i => Object.keys(mem)[i] || null,
+          get length() { return Object.keys(mem).length; }
+        }
+      });
+    } catch (e) {}
+  }
+})();
+
+const PI2 = Math.PI * 2;
+const STORAGE = {
+  ACCOUNTS: 'sod_accounts_v3',
+  CURRENT : 'sod_current_user_v3',
+  GUEST   : 'sod_guest_save_v3',
+  TOKEN   : 'sod_jwt_v3',
+  SERVER  : 'sod_server_url_v3'
+};
+const DEFAULT_SERVER = 'http://192.168.0.30:1000';
+function resolveServerURL() {
+  const override = localStorage.getItem(STORAGE.SERVER);
+  if (override) return override.replace(/\/$/, '');
+  if (location.protocol === 'http:' || location.protocol === 'https:') return location.origin;
+  return DEFAULT_SERVER;
+}
+let SERVER_URL = resolveServerURL();
+
+const NUM_SUFFIX = ['','K','M','B','T','Qa','Qi','Sx','Sp','Oc','No','Dc','Ud','Dd','Td','Qad','Qid','Sxd','Spd','Ocd','Nod','Vg'];
+function formatNumber(n) {
+  if (!isFinite(n)) return '∞';
+  if (n < 1000) return Math.floor(n).toString();
+  let tier = Math.floor(Math.log10(n) / 3);
+  if (tier >= NUM_SUFFIX.length) tier = NUM_SUFFIX.length - 1;
+  const scaled = n / Math.pow(1000, tier);
+  const dec = scaled < 10 ? 2 : scaled < 100 ? 1 : 0;
+  return scaled.toFixed(dec) + NUM_SUFFIX[tier];
+}
+const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+
+const SHIP_TIERS = [
+  { level:1,  name:'Vanguard Scout',        color:'#00f0ff', value:1,     speed:0.0150, shape:0 },
+  { level:2,  name:'Plasma Fighter',        color:'#ff0077', value:2.5,   speed:0.0168, shape:1 },
+  { level:3,  name:'Solar Interceptor',     color:'#ffd700', value:6,     speed:0.0186, shape:2 },
+  { level:4,  name:'Nebula Cruiser',        color:'#a000ff', value:15,    speed:0.0204, shape:3 },
+  { level:5,  name:'Void Destroyer',        color:'#00ff66', value:40,    speed:0.0222, shape:0 },
+  { level:6,  name:'Quantum Battleship',    color:'#ff4500', value:100,   speed:0.0240, shape:1 },
+  { level:7,  name:'Astra Titan',           color:'#ffffff', value:250,   speed:0.0258, shape:2 },
+  { level:8,  name:'Hyper Mothership',      color:'#00ffff', value:650,   speed:0.0276, shape:3 },
+  { level:9,  name:'Blackhole Dreadnought', color:'#ff00ff', value:1600,  speed:0.0294, shape:0 },
+  { level:10, name:'Cosmic Phoenix',        color:'#ffbb00', value:4000,  speed:0.0312, shape:1 },
+  { level:11, name:'Nova Sovereign',        color:'#7cffcb', value:10000, speed:0.0330, shape:2 },
+  { level:12, name:'Eternal Leviathan',     color:'#ff6ec7', value:26000, speed:0.0348, shape:3 }
+];
+
+const P_PREFIX = ['Terra','Vulcan','Cryo','Cyber','Nova','Astra','Zenith','Nyx','Helios','Erebus','Orion','Lyra','Vega','Rigel','Altair','Draco','Hydra','Phoenix','Aquila','Corvus','Cygnus','Perseus','Andromeda','Carina','Dorado','Fornax','Gemini','Indus','Lupus','Mensa','Norma','Octans','Pavo','Reticulum','Serpens','Tucana','Vela','Volans','Auriga','Bootes','Caelum','Delphinus','Equuleus','Grus','Horologium','Lacerta','Monoceros','Pictor','Sculptor','Ara'];
+const P_SUFFIX = ['Prime','Majoris','Minoris','Nova','Ultra','Core','Reach','Expanse','Haven','Bastion','Void','Nexus','Spire','Drift','Cradle','Forge','Gate','Halo','Shard','Vector'];
+
+function romanize(n) {
+  const m = [[1000,'M'],[900,'CM'],[500,'D'],[400,'CD'],[100,'C'],[90,'XC'],[50,'L'],[40,'XL'],[10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']];
+  let out = '';
+  for (const [v,s] of m) while (n >= v) { out += s; n -= v; }
+  return out || 'I';
+}
+function buildPlanets(count) {
+  const list = [];
+  const used = new Set();
+  let seed = 1337;
+  const rnd = () => { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; };
+  const types = ['Terran','Molten','Ice','Gas Giant','Crystalline','Ocean','Desert','Toxic','Plasma','Void'];
+  for (let i = 0; i < count; i++) {
+    let name, guard = 0;
+    do {
+      name = P_PREFIX[Math.floor(rnd()*P_PREFIX.length)] + ' ' + P_SUFFIX[Math.floor(rnd()*P_SUFFIX.length)];
+      guard++;
+    } while (used.has(name) && guard < 200);
+    if (used.has(name)) name += ' ' + romanize(i + 1);
+    used.add(name);
+    const hue = (i * 37 + 160) % 360;
+    const hue2 = (hue + 35 + (i % 5) * 12) % 360;
+    const sat = 62 + (i % 4) * 8;
+    const lig = 48 + (i % 3) * 6;
+    const c1 = `hsl(${hue}, ${sat}%, ${lig}%)`;
+    const c2 = `hsl(${hue2}, ${Math.max(35, sat-25)}%, ${Math.max(12, lig-38)}%)`;
+    const c3 = `hsl(${(hue+180)%360}, 85%, 65%)`;
+    const mult = i === 0 ? 1 : Math.pow(1.072, i);
+    const keysNeeded = i === 0 ? 0 : Math.max(1, Math.ceil(Math.pow(i, 1.08) * 0.55));
+    const ring = i > 0 && (i % 3 === 0 || i % 7 === 0);
+    const ringTilt = -0.55 + rnd() * 1.1;
+    const moons = i > 4 ? (i % 3) + 1 : (i > 1 ? 1 : 0);
+    const bandCount = 2 + (i % 5);
+    const atmoStrength = 0.35 + (i % 4) * 0.14;
+    list.push({
+      id: 'p'+i, index: i, name, type: types[i % types.length],
+      c1, c2, c3, hue, keysNeeded, mult,
+      ring, ringTilt, moons, bandCount, atmoStrength,
+      desc: `${types[i % types.length]} world — ${mult < 10 ? mult.toFixed(2) : Math.floor(mult)}x income${ring ? ' · ringed' : ''}.`
+    });
+  }
+  return list;
+}
+const PLANETS = buildPlanets(100);
+const TOTAL_PLANETS = PLANETS.length;
+
+class SoundEngine {
+  constructor() { this.ctx = null; this.muted = false; }
+  init() {
+    if (!this.ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) { try { this.ctx = new AC(); } catch (e) { this.ctx = null; } }
+    }
+    if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume().catch(()=>{});
+  }
+  _tone(freq, dur, type, vol, slideTo) {
+    if (this.muted) return;
+    this.init();
+    if (!this.ctx) return;
+    try {
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = type || 'sine';
+      osc.frequency.setValueAtTime(freq, now);
+      if (slideTo) osc.frequency.exponentialRampToValueAtTime(slideTo, now + dur);
+      gain.gain.setValueAtTime(vol, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+      osc.connect(gain); gain.connect(this.ctx.destination);
+      osc.start(now); osc.stop(now + dur + 0.02);
+    } catch (e) {}
+  }
+  playCoin(p=1) { this._tone(820*p, 0.1, 'sine', 0.09, 1450*p); }
+  playMerge()   { this._tone(280, 0.3, 'triangle', 0.2, 950); }
+  playUpgrade() { [440,554,659,880].forEach((f,i)=>setTimeout(()=>this._tone(f,0.13,'sine',0.09), i*45)); }
+  playRebirth() { [200,400,600,800,1200,1600].forEach((f,i)=>setTimeout(()=>this._tone(f,0.34,'sawtooth',0.11), i*80)); }
+  playUnlock()  { [523,659,784,1047].forEach((f,i)=>setTimeout(()=>this._tone(f,0.2,'triangle',0.1), i*70)); }
+  playError()   { this._tone(180, 0.18, 'square', 0.08, 110); }
+}
+const audio = new SoundEngine();
+
+let coins = 100, rebirths = 0, keys = 0;
+let selectedPlanetIndex = 0, unlockedPlanets = [0];
+let maxShipCapacity = 8, shipCost = 100, gateCost = 150, mergeCost = 50, rebirthBaseCost = 1e6;
+let isTurbo = false, globalSpeedMultiplier = 1, hasUnlimitedFlash = false, flashTimer = 0;
+let ships = [], gates = [0, Math.PI];
+let floatingTexts = [], particles = [], shockwaves = [], stars = [];
+let trackArrowOffset = 0, planetRotation = 0, nebulaT = 0;
+let bgCanvas = null, bgCtx = null;
+let centerX = 0, centerY = 0, trackRadius = 140, viewW = 800, viewH = 600;
+let shakeTime = 0, shakeMag = 0;
+let incomeWindow = [], coinRate = 0;
+
+let currentUser = null;
+let authToken = null;
+let authMode = 'login';
+let usingServer = false;
+
+let planetFilter = 'all', planetSearchTerm = '';
+let lbSort = 'coins';
+
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d', { alpha: false });
+const $ = id => document.getElementById(id);
+
+/* ============================================================
+   VR ENGINE
+   ============================================================ */
+const VR = {
+  active: false,
+  immersive: false,        // true = stereo views rendering
+  leftCanvas: null,
+  rightCanvas: null,
+  leftCtx: null,
+  rightCtx: null,
+  // eye offsets in pixels (parallax)
+  eyeSeparation: 22,
+  // device orientation → camera tilt
+  yaw: 0, pitch: 0,
+  targetYaw: 0, targetPitch: 0,
+  orientationHandler: null,
+  xrSession: null,
+  xrRefSpace: null,
+  xrBaseLayer: null,
+  xrFrameReq: null,
+  lastFrame: performance.now(),
+
+  init() {
+    this.leftCanvas = $('vr-canvas-left');
+    this.rightCanvas = $('vr-canvas-right');
+    this.leftCtx = this.leftCanvas.getContext('2d', { alpha: false });
+    this.rightCtx = this.rightCanvas.getContext('2d', { alpha: false });
+
+    // buttons
+    $('btn-vr').addEventListener('click', () => this.open());
+    $('vr-enter-btn').addEventListener('click', () => this.enterImmersion());
+    $('vr-cancel-btn').addEventListener('click', () => this.close());
+    $('vr-exit-btn').addEventListener('click', () => this.close());
+
+    // VR bottom action bar
+    document.querySelectorAll('[data-vr-action]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const a = btn.dataset.vrAction;
+        if (a === 'merge') buyOrMerge('merge');
+        else if (a === 'ship') buyOrMerge('ship');
+        else if (a === 'gate') buyOrMerge('gate');
+        else if (a === 'rebirth') { this.close(); openRebirthModal(); }
+        else if (a === 'flash') { this.close(); openFlashModal(); }
+        else if (a === 'atlas') { this.close(); openShop(); }
+        else if (a === 'ranks') { this.close(); openLeaderboard(); }
+      });
+    });
+
+    // handle resize
+    window.addEventListener('resize', () => {
+      if (this.active && this.immersive) this.resizeEyeCanvases();
+    });
+    window.addEventListener('orientationchange', () => {
+      if (this.active && this.immersive) setTimeout(() => this.resizeEyeCanvases(), 300);
+    });
+  },
+
+  async open() {
+    // check WebXR support
+    if (navigator.xr) {
+      try {
+        const supported = await navigator.xr.isSessionSupported('immersive-vr');
+        if (supported) {
+          this.showVRToast('WebXR headset detected');
+        }
+      } catch (e) {}
+    }
+    $('vr-overlay').classList.add('active');
+    $('vr-splash').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  },
+
+  close() {
+    $('vr-overlay').classList.remove('active');
+    $('vr-splash').classList.add('hidden');
+    document.body.style.overflow = '';
+    this.stopOrientation();
+    if (this.xrSession) {
+      try { this.xrSession.end(); } catch (e) {}
+      this.xrSession = null;
+    }
+    this.active = false;
+    this.immersive = false;
+  },
+
+  async enterImmersion() {
+    // try WebXR first
+    if (navigator.xr) {
+      try {
+        const supported = await navigator.xr.isSessionSupported('immersive-vr');
+        if (supported) {
+          await this.startXR();
+          return;
+        }
+      } catch (e) { console.warn('WebXR start failed, using fallback', e); }
+    }
+    // fallback: stereo + device orientation
+    this.startStereoFallback();
+  },
+
+  async startXR() {
+    try {
+      const session = await navigator.xr.requestSession('immersive-vr', {
+        optionalFeatures: ['local-floor']
+      });
+      this.xrSession = session;
+      this.active = true;
+      this.immersive = true;
+      $('vr-splash').classList.add('hidden');
+
+      const glCanvas = document.createElement('canvas');
+      const gl = glCanvas.getContext('webgl', { xrCompatible: true });
+      session.updateRenderState({ baseLayer: new XRWebGLLayer(session, gl) });
+      this.xrBaseLayer = session.renderState.baseLayer;
+      this.xrRefSpace = await session.requestReferenceSpace('local');
+      this.xrGL = gl;
+      this.xrCanvas = glCanvas;
+
+      session.addEventListener('end', () => {
+        this.xrSession = null;
+        this.close();
+      });
+
+      const onFrame = (time, frame) => {
+        if (!this.xrSession) return;
+        this.xrFrameReq = session.requestAnimationFrame(onFrame);
+        const pose = frame.getViewerPose(this.xrRefSpace);
+        if (pose) {
+          // left / right eye stereo visualization update
+          this.xrPose = pose;
+        }
+      };
+      this.xrFrameReq = session.requestAnimationFrame(onFrame);
+      this.showVRToast('🥽 WebXR immersive active');
+    } catch (e) {
+      console.warn('WebXR error:', e);
+      this.startStereoFallback();
+    }
+  },
+
+  startStereoFallback() {
+    this.active = true;
+    this.immersive = true;
+    $('vr-splash').classList.add('hidden');
+    this.resizeEyeCanvases();
+    this.startOrientation();
+    this.showVRToast('🥽 Cardboard stereo mode active');
+
+    // request fullscreen where possible
+    const el = $('vr-overlay');
+    if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
+    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+  },
+
+  resizeEyeCanvases() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const lw = $('vr-left').clientWidth || window.innerWidth / 2;
+    const lh = $('vr-left').clientHeight || window.innerHeight;
+    const rw = $('vr-right').clientWidth || window.innerWidth / 2;
+    const rh = $('vr-right').clientHeight || window.innerHeight;
+    for (const [cv, w, h] of [[this.leftCanvas, lw, lh], [this.rightCanvas, rw, rh]]) {
+      cv.width = Math.max(1, Math.round(w * dpr));
+      cv.height = Math.max(1, Math.round(h * dpr));
+      cv.style.width = w + 'px';
+      cv.style.height = h + 'px';
+    }
+    const lctx = this.leftCtx, rctx = this.rightCtx;
+    if (lctx) lctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if (rctx) rctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  },
+
+  startOrientation() {
+    if (this.orientationHandler) return;
+    const onOrient = (e) => {
+      let yaw = e.alpha || 0;      // 0..360
+      let pitch = e.beta || 0;     // -180..180
+      // Convert to radians relative to a "look forward" center
+      // Center is 0deg yaw (north) and 0deg pitch
+      const yawRad = ((yaw) * Math.PI / 180);
+      const pitchRad = (pitch * Math.PI / 180);
+      this.targetYaw = yawRad;
+      this.targetPitch = pitchRad;
+    };
+    this.orientationHandler = onOrient;
+    if (window.DeviceOrientationEvent) {
+      if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+        // iOS Safari — needs user gesture
+        DeviceOrientationEvent.requestPermission()
+          .then(state => { if (state === 'granted') window.addEventListener('deviceorientation', onOrient); })
+          .catch(() => {});
+      } else {
+        window.addEventListener('deviceorientation', onOrient);
+      }
+    }
+  },
+  stopOrientation() {
+    if (this.orientationHandler) {
+      window.removeEventListener('deviceorientation', this.orientationHandler);
+      this.orientationHandler = null;
+    }
+  },
+
+  // render one eye — same scene, offset by parallax and rotated by head tilt
+  renderEye(targetCtx, eyeOffsetX) {
+    const w = targetCtx.canvas.clientWidth;
+    const h = targetCtx.canvas.clientHeight;
+
+    targetCtx.save();
+    targetCtx.clearRect(0, 0, w, h);
+
+    // Smooth camera lerp
+    this.yaw += (this.targetYaw - this.yaw) * 0.12;
+    this.pitch += (this.targetPitch - this.pitch) * 0.12;
+
+    // Camera pivot at scene center; convert tilt to a slight rotation & offset
+    const cx = centerX + eyeOffsetX + Math.sin(this.yaw) * 40;
+    const cy = centerY - this.pitch * 60 + Math.cos(this.yaw) * 6;
+
+    // -------- draw scene into this eye --------
+    // 1. background
+    if (bgCanvas) targetCtx.drawImage(bgCanvas, -eyeOffsetX - 40, 0, viewW + 80, viewH);
+    else { targetCtx.fillStyle = '#01010a'; targetCtx.fillRect(0,0,w,h); }
+
+    // 2. stars (parallax per eye)
+    const eyeFactor = eyeOffsetX * 0.02;
+    for (const s of stars) {
+      s.alpha += s.pulseSpeed;
+      if (s.alpha > 1) { s.alpha = 1; s.pulseSpeed = -Math.abs(s.pulseSpeed); }
+      if (s.alpha < 0.12) { s.alpha = 0.12; s.pulseSpeed = Math.abs(s.pulseSpeed); }
+      const sx = s.x - eyeFactor * s.depth;
+      const col = s.hue === 0 ? `rgba(255,255,255,${Math.abs(s.alpha)})`
+                : s.hue === 200 ? `rgba(140,200,255,${Math.abs(s.alpha)})`
+                                : `rgba(255,170,230,${Math.abs(s.alpha)})`;
+      targetCtx.fillStyle = col;
+      targetCtx.beginPath();
+      targetCtx.arc(sx, s.y, s.size * s.depth, 0, PI2);
+      targetCtx.fill();
+    }
+
+    // 3. planet
+    const planet = PLANETS[selectedPlanetIndex];
+    const planetRadius = trackRadius * 0.40 * 1.15;
+    drawPlanetBodyFor(targetCtx, cx, cy, planetRadius, planet, planetRotation);
+
+    // 4. track ring (ellipse to imply depth when tilted)
+    const tiltFactor = 1 - Math.abs(this.pitch) * 0.35;
+    targetCtx.save();
+    targetCtx.beginPath();
+    targetCtx.ellipse(cx, cy, trackRadius, trackRadius * Math.max(0.35, tiltFactor), 0, 0, PI2);
+    targetCtx.strokeStyle = 'rgba(255,255,255,0.055)';
+    targetCtx.lineWidth = 20;
+    targetCtx.stroke();
+    targetCtx.beginPath();
+    targetCtx.ellipse(cx, cy, trackRadius, trackRadius * Math.max(0.35, tiltFactor), 0, 0, PI2);
+    targetCtx.strokeStyle = hexA(planet.c1, 0.6);
+    targetCtx.lineWidth = 2;
+    targetCtx.shadowColor = planet.c1;
+    targetCtx.shadowBlur = 14;
+    targetCtx.stroke();
+    targetCtx.shadowBlur = 0;
+    targetCtx.restore();
+
+    // 5. gates
+    for (const g of gates) {
+      const gx = cx + Math.cos(g) * trackRadius;
+      const gy = cy + Math.sin(g) * trackRadius * Math.max(0.35, tiltFactor);
+      targetCtx.save();
+      targetCtx.translate(gx, gy);
+      targetCtx.fillStyle = '#00f0ff';
+      targetCtx.shadowColor = '#00f0ff';
+      targetCtx.shadowBlur = 14;
+      targetCtx.fillRect(-10, -6, 5, 12);
+      targetCtx.fillRect(5, -6, 5, 12);
+      targetCtx.shadowBlur = 0;
+      targetCtx.strokeStyle = 'rgba(255,255,255,.85)';
+      targetCtx.lineWidth = 2;
+      targetCtx.beginPath();
+      targetCtx.moveTo(-6, 0);
+      targetCtx.lineTo(6, 0);
+      targetCtx.stroke();
+      targetCtx.restore();
+    }
+
+    // 6. ships
+    for (const ship of ships) {
+      const tier = SHIP_TIERS[clamp(ship.level, 1, SHIP_TIERS.length) - 1];
+      const sx = cx + Math.cos(ship.angle) * trackRadius;
+      const sy = cy + Math.sin(ship.angle) * trackRadius * Math.max(0.35, tiltFactor);
+      drawShipFor(targetCtx, sx, sy, ship.angle, tier, ship.level, eyeOffsetX);
+    }
+
+    // 7. particles + floating texts
+    for (const p of particles) {
+      targetCtx.globalAlpha = p.life;
+      targetCtx.fillStyle = p.color;
+      targetCtx.beginPath();
+      targetCtx.arc(p.x + eyeOffsetX * 0.05, p.y, p.size * p.life, 0, PI2);
+      targetCtx.fill();
+    }
+    targetCtx.globalAlpha = 1;
+    for (const f of floatingTexts) {
+      targetCtx.globalAlpha = clamp(f.life, 0, 1);
+      targetCtx.fillStyle = f.color;
+      targetCtx.font = 'bold 16px Orbitron, sans-serif';
+      targetCtx.textAlign = 'center';
+      targetCtx.fillText(f.text, f.x + eyeOffsetX * 0.05, f.y);
+    }
+    targetCtx.globalAlpha = 1;
+
+    targetCtx.restore();
+  }
+};
+
+/* ---------- shared draw helpers that take an explicit ctx ---------- */
+function drawPlanetBodyFor(c, cx, cy, r, planet, rot) {
+  const atmo = c.createRadialGradient(cx, cy, r*0.85, cx, cy, r*(1.5 + planet.atmoStrength*0.5));
+  atmo.addColorStop(0, hexA(planet.c1, 0.42));
+  atmo.addColorStop(0.45, hexA(planet.c3, 0.14));
+  atmo.addColorStop(1, 'rgba(0,0,0,0)');
+  c.fillStyle = atmo;
+  c.beginPath(); c.arc(cx, cy, r*(1.5 + planet.atmoStrength*0.5), 0, PI2); c.fill();
+
+  if (planet.ring) {
+    c.save(); c.translate(cx, cy); c.rotate(planet.ringTilt);
+    c.beginPath(); c.ellipse(0, 0, r*1.95, r*0.52, 0, 0, PI2);
+    c.strokeStyle = hexA(planet.c3, 0.55); c.lineWidth = r*0.16; c.stroke();
+    c.restore();
+  }
+
+  const body = c.createRadialGradient(cx - r*0.35, cy - r*0.38, r*0.06, cx, cy, r);
+  body.addColorStop(0, planet.c1);
+  body.addColorStop(0.55, planet.c2);
+  body.addColorStop(1, '#03030c');
+  c.fillStyle = body;
+  c.beginPath(); c.arc(cx, cy, r, 0, PI2); c.fill();
+
+  c.save();
+  c.beginPath(); c.arc(cx, cy, r, 0, PI2); c.clip();
+  c.globalAlpha = 0.18;
+  for (let i = 0; i < planet.bandCount; i++) {
+    const yy = cy + (i - (planet.bandCount-1)/2) * r*0.42;
+    c.beginPath(); c.ellipse(cx, yy, r*1.25, r*0.14, 0, 0, PI2);
+    c.strokeStyle = i % 2 ? planet.c3 : '#ffffff';
+    c.lineWidth = r*0.11; c.stroke();
+  }
+  c.globalAlpha = 1;
+
+  c.save();
+  c.translate(cx, cy); c.rotate(rot);
+  c.globalAlpha = 0.25; c.fillStyle = '#000000';
+  for (let i = 0; i < 4; i++) {
+    const a = i * 1.9, rr = r * (0.28 + (i%3) * 0.18);
+    c.beginPath();
+    c.ellipse(Math.cos(a)*r*0.42, Math.sin(a*1.3)*r*0.36, rr*0.62, rr*0.38, a, 0, PI2);
+    c.fill();
+  }
+  c.restore();
+
+  const shadow = c.createRadialGradient(cx - r*0.55, cy - r*0.58, r*0.1, cx - r*0.2, cy - r*0.2, r*1.55);
+  shadow.addColorStop(0, 'rgba(0,0,0,0)');
+  shadow.addColorStop(0.6, 'rgba(0,0,0,0.25)');
+  shadow.addColorStop(1, 'rgba(0,0,0,0.85)');
+  c.fillStyle = shadow;
+  c.beginPath(); c.arc(cx, cy, r, 0, PI2); c.fill();
+
+  c.beginPath(); c.arc(cx, cy, r-1, Math.PI*0.9, Math.PI*1.9);
+  c.strokeStyle = hexA(planet.c3, 0.7); c.lineWidth = r*0.06; c.stroke();
+  c.restore();
+
+  if (planet.ring) {
+    c.save(); c.translate(cx, cy); c.rotate(planet.ringTilt);
+    c.beginPath(); c.ellipse(0, 0, r*1.95, r*0.52, 0, 0, Math.PI);
+    c.strokeStyle = hexA(planet.c3, 0.72); c.lineWidth = r*0.16; c.stroke();
+    c.restore();
+  }
+  for (let m = 0; m < planet.moons; m++) {
+    const ma = rot*(1.2 + m*0.35) + m*2.1;
+    const md = r * (1.7 + m*0.42);
+    const mx = cx + Math.cos(ma)*md;
+    const my = cy + Math.sin(ma)*md*0.55;
+    const mr = Math.max(1.6, r*0.075);
+    c.beginPath(); c.arc(mx, my, mr, 0, PI2);
+    c.fillStyle = '#cfd8ff';
+    c.shadowColor = '#8fb6ff'; c.shadowBlur = 8;
+    c.fill(); c.shadowBlur = 0;
+  }
+}
+
+function drawShipFor(c, sx, sy, angle, tier, level, eyeOffset) {
+  c.save();
+  c.translate(sx, sy);
+  c.rotate(angle + Math.PI/2);
+  const scale = (0.85 + Math.min(level, 12) * 0.035) * 1.15;
+
+  const flicker = 0.7 + Math.random()*0.5;
+  const flameLen = (12 + level*1.2) * flicker * scale;
+  const fg = c.createLinearGradient(0, 8, 0, 8 + flameLen);
+  fg.addColorStop(0, hexA(tier.color, 0.95));
+  fg.addColorStop(0.5, hexA(tier.color, 0.45));
+  fg.addColorStop(1, 'rgba(0,0,0,0)');
+  c.fillStyle = fg;
+  c.beginPath();
+  c.moveTo(-3.4*scale, 7*scale);
+  c.lineTo(0, 8*scale + flameLen);
+  c.lineTo(3.4*scale, 7*scale);
+  c.closePath(); c.fill();
+
+  c.shadowColor = tier.color; c.shadowBlur = 16;
+  c.fillStyle = tier.color;
+  c.beginPath();
+  switch (tier.shape) {
+    case 0:
+      c.moveTo(0, -15*scale); c.lineTo(-9*scale, 10*scale);
+      c.lineTo(0, 6*scale); c.lineTo(9*scale, 10*scale); break;
+    case 1:
+      c.moveTo(0, -15*scale); c.lineTo(-8*scale, 0);
+      c.lineTo(0, 11*scale); c.lineTo(8*scale, 0); break;
+    case 2:
+      c.moveTo(0, -14*scale); c.lineTo(-12*scale, 4*scale);
+      c.lineTo(-5*scale, 3*scale); c.lineTo(0, 10*scale);
+      c.lineTo(5*scale, 3*scale); c.lineTo(12*scale, 4*scale); break;
+    default:
+      c.moveTo(0, -15*scale); c.lineTo(-7*scale, -3*scale);
+      c.lineTo(-10*scale, 8*scale); c.lineTo(0, 5*scale);
+      c.lineTo(10*scale, 8*scale); c.lineTo(7*scale, -3*scale); break;
+  }
+  c.closePath(); c.fill();
+  c.shadowBlur = 0;
+
+  c.fillStyle = 'rgba(255,255,255,0.92)';
+  c.beginPath(); c.ellipse(0, -4*scale, 2.6*scale, 4.2*scale, 0, 0, PI2); c.fill();
+
+  c.fillStyle = 'rgba(0,0,0,0.85)';
+  c.font = `900 ${Math.round(8*scale)}px Orbitron, sans-serif`;
+  c.textAlign = 'center'; c.textBaseline = 'middle';
+  c.fillText(level, 0, 3.5*scale);
+  c.restore();
+}
+
+/* VR stereo frame loop — separate from main game loop */
+function vrLoop(now) {
+  if (!VR.active) {
+    requestAnimationFrame(vrLoop);
+    return;
+  }
+  if (VR.immersive && VR.leftCtx && VR.rightCtx) {
+    // simple eye-separation stereo
+    VR.renderEye(VR.leftCtx,  -VR.eyeSeparation);
+    VR.renderEye(VR.rightCtx,  VR.eyeSeparation);
+
+    // update HUD values
+    $('vr-coins').innerText = '$ ' + formatNumber(coins);
+    $('vr-mult').innerText = 'MULT ' + formatNumber(getIncomeMultiplier()) + 'x';
+  }
+  requestAnimationFrame(vrLoop);
+}
+
+function vrToastShow(msg) {
+  const t = $('vr-toast');
+  if (!t) return;
+  t.innerText = msg;
+  t.classList.add('show');
+  clearTimeout(vrToastShow._t);
+  vrToastShow._t = setTimeout(() => t.classList.remove('show'), 2000);
+}
+VR.showVRToast = vrToastShow;
+VR.showVRToast = vrToastShow;
+
+/* ============================================================
+   GAME — same logic as before
+   ============================================================ */
+const API = {
+  async request(path, opts = {}) {
+    const url = SERVER_URL + path;
+    const headers = Object.assign({ 'Content-Type': 'application/json' }, opts.headers || {});
+    if (authToken) headers['Authorization'] = 'Bearer ' + authToken;
+    const ctrl = new AbortController();
+    const to = setTimeout(() => ctrl.abort(), 5000);
+    try {
+      const r = await fetch(url, { ...opts, headers, signal: ctrl.signal });
+      clearTimeout(to);
+      const data = await r.json().catch(() => ({}));
+      return { ok: r.ok, status: r.status, data };
+    } catch (e) {
+      clearTimeout(to);
+      return { ok: false, status: 0, data: { error: 'network' } };
+    }
+  },
+  async ping() { return (await this.request('/api/health')).ok; },
+  async register(u, p) { return this.request('/api/register', { method:'POST', body: JSON.stringify({ username: u, password: p })}); },
+  async login(u, p)    { return this.request('/api/login',    { method:'POST', body: JSON.stringify({ username: u, password: p })}); },
+  async getSave()      { return this.request('/api/save'); },
+  async postSave(s)    { return this.request('/api/save', { method:'POST', body: JSON.stringify({ save: s })}); },
+  async leaderboard(sort = 'coins', limit = 50) {
+    return this.request(`/api/leaderboard?sort=${encodeURIComponent(sort)}&limit=${limit}`);
+  }
+};
+
+function lhash(str) {
+  let h = 5381;
+  const s = 'so#' + str + '#deluxe';
+  for (let i = 0; i < s.length; i++) h = ((h << 5) + h) ^ s.charCodeAt(i);
+  return (h >>> 0).toString(16) + '_' + s.length;
+}
+const local = {
+  accounts: () => { try { return JSON.parse(localStorage.getItem(STORAGE.ACCOUNTS) || '{}'); } catch { return {}; } },
+  setAccounts: a => { try { localStorage.setItem(STORAGE.ACCOUNTS, JSON.stringify(a)); } catch {} },
+  getUser: () => { try { return localStorage.getItem(STORAGE.CURRENT); } catch { return null; } },
+  setUser: k => { try { k ? localStorage.setItem(STORAGE.CURRENT, k) : localStorage.removeItem(STORAGE.CURRENT); } catch {} }
+};
+
+function spawnExplosion(x, y, color, count = 24) {
+  for (let i = 0; i < count; i++) {
+    const a = Math.random() * PI2, sp = Math.random() * 4.5 + 1.2;
+    particles.push({ x, y, vx: Math.cos(a)*sp, vy: Math.sin(a)*sp, life: 1, decay: Math.random()*0.028 + 0.016, color, size: Math.random()*3.6 + 1.6, drag: 0.965 });
+  }
+}
+function spawnShockwave(x, y, color, scale = 1) { shockwaves.push({ x, y, r: 6, maxR: 90*scale, life: 1, color, speed: 3.2*scale }); }
+function spawnFloatingText(x, y, text, color = '#ffd700') { floatingTexts.push({ x, y, text, life: 1, vy: -1.35, color }); }
+function screenShake(mag, dur) { shakeMag = Math.max(shakeMag, mag); shakeTime = Math.max(shakeTime, dur); }
+function hexA(color, a) {
+  if (color.startsWith('hsl')) return color.replace('hsl(', 'hsla(').replace(')', `, ${a})`);
+  if (color.startsWith('#')) {
+    let h = color.slice(1);
+    if (h.length === 3) h = h.split('').map(c => c+c).join('');
+    return `rgba(${parseInt(h.slice(0,2),16)},${parseInt(h.slice(2,4),16)},${parseInt(h.slice(4,6),16)},${a})`;
+  }
+  return color;
+}
+
+function resizeCanvas() {
+  const host = canvas.parentElement;
+  const w = host.clientWidth || window.innerWidth;
+  const h = host.clientHeight || window.innerHeight;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  viewW = w; viewH = h;
+  canvas.width = Math.max(1, Math.round(w * dpr));
+  canvas.height = Math.max(1, Math.round(h * dpr));
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  centerX = w / 2; centerY = h / 2;
+  trackRadius = Math.max(64, Math.min(w, h) * 0.265);
+  buildStars(w, h);
+  buildBackground(w, h, dpr);
+}
+function buildStars(w, h) {
+  stars = [];
+  const count = clamp(Math.round((w*h)/4200), 60, 340);
+  for (let i = 0; i < count; i++) {
+    stars.push({
+      x: Math.random()*w, y: Math.random()*h,
+      size: Math.random()*1.6 + 0.35,
+      alpha: Math.random(),
+      pulseSpeed: (Math.random()*0.016 + 0.004) * (Math.random() < 0.5 ? -1 : 1),
+      depth: Math.random()*0.7 + 0.3,
+      hue: Math.random() < 0.75 ? 0 : (Math.random() < 0.5 ? 200 : 320)
+    });
+  }
+}
+function buildBackground(w, h, dpr) {
+  const scale = dpr || 1;
+  if (!bgCanvas) bgCanvas = document.createElement('canvas');
+  bgCanvas.width = Math.max(1, Math.round(w*scale));
+  bgCanvas.height = Math.max(1, Math.round(h*scale));
+  bgCtx = bgCanvas.getContext('2d');
+  bgCtx.setTransform(scale, 0, 0, scale, 0, 0);
+  const base = bgCtx.createLinearGradient(0, 0, w, h);
+  base.addColorStop(0, '#04030f'); base.addColorStop(0.5, '#01010a'); base.addColorStop(1, '#050213');
+  bgCtx.fillStyle = base; bgCtx.fillRect(0, 0, w, h);
+  const blobs = [
+    { x: w*0.18, y: h*0.22, r: Math.max(w,h)*0.45, c: 'rgba(88,28,190,0.32)' },
+    { x: w*0.82, y: h*0.30, r: Math.max(w,h)*0.40, c: 'rgba(0,140,200,0.24)' },
+    { x: w*0.50, y: h*0.88, r: Math.max(w,h)*0.48, c: 'rgba(190,20,110,0.20)' },
+    { x: w*0.12, y: h*0.80, r: Math.max(w,h)*0.34, c: 'rgba(0,190,140,0.16)' },
+    { x: w*0.66, y: h*0.60, r: Math.max(w,h)*0.30, c: 'rgba(255,140,0,0.10)' }
+  ];
+  for (const b of blobs) {
+    const g = bgCtx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r);
+    g.addColorStop(0, b.c); g.addColorStop(1, 'rgba(0,0,0,0)');
+    bgCtx.fillStyle = g; bgCtx.fillRect(0, 0, w, h);
+  }
+}
+
+function drawPlanetBody(cx, cy, r, planet, rot) { drawPlanetBodyFor(ctx, cx, cy, r, planet, rot); }
+function drawShip(sx, sy, angle, tier, level) { drawShipFor(ctx, sx, sy, angle, tier, level, 0); }
+
+let lastFrame = performance.now();
+let fpsAccum = 0;
+function gameLoop(now) {
+  const dtMs = Math.min(50, now - lastFrame);
+  lastFrame = now;
+  const dt = dtMs / 16.6667;
+  const t = now / 1000;
+
+  let shakeX = 0, shakeY = 0;
+  if (shakeTime > 0) {
+    shakeTime -= dtMs / 1000;
+    const k = Math.max(0, shakeTime) * 3;
+    shakeX = (Math.random() - 0.5) * shakeMag * k;
+    shakeY = (Math.random() - 0.5) * shakeMag * k;
+    if (shakeTime <= 0) shakeMag = 0;
+  }
+
+  ctx.save();
+  ctx.translate(shakeX, shakeY);
+
+  if (bgCanvas) ctx.drawImage(bgCanvas, 0, 0, viewW, viewH);
+  else { ctx.fillStyle = '#01010a'; ctx.fillRect(0, 0, viewW, viewH); }
+
+  nebulaT += dt * 0.0025;
+  for (const s of stars) {
+    s.alpha += s.pulseSpeed * dt;
+    if (s.alpha > 1) { s.alpha = 1; s.pulseSpeed = -Math.abs(s.pulseSpeed); }
+    if (s.alpha < 0.12) { s.alpha = 0.12; s.pulseSpeed = Math.abs(s.pulseSpeed); }
+    const tw = s.alpha * (0.6 + 0.4*Math.sin(t*2 + s.x));
+    const col = s.hue === 0 ? `rgba(255,255,255,${tw})` : s.hue === 200 ? `rgba(140,200,255,${tw})` : `rgba(255,170,230,${tw})`;
+    ctx.fillStyle = col;
+    const sz = s.size * s.depth;
+    ctx.beginPath(); ctx.arc(s.x, s.y, sz, 0, PI2); ctx.fill();
+    if (s.size > 1.35 && s.alpha > 0.75) {
+      ctx.strokeStyle = `rgba(255,255,255,${(s.alpha-0.75)*1.6})`;
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      ctx.moveTo(s.x - sz*3.2, s.y); ctx.lineTo(s.x + sz*3.2, s.y);
+      ctx.moveTo(s.x, s.y - sz*3.2); ctx.lineTo(s.x, s.y + sz*3.2);
+      ctx.stroke();
+    }
+  }
+
+  planetRotation += 0.0042 * dt;
+  const planet = PLANETS[selectedPlanetIndex];
+  const planetRadius = trackRadius * 0.40;
+  drawPlanetBody(centerX, centerY, planetRadius, planet, planetRotation);
+
+  ctx.beginPath(); ctx.arc(centerX, centerY, trackRadius, 0, PI2);
+  ctx.strokeStyle = 'rgba(255,255,255,0.055)'; ctx.lineWidth = 20; ctx.stroke();
+
+  ctx.beginPath(); ctx.arc(centerX, centerY, trackRadius, 0, PI2);
+  ctx.strokeStyle = hexA(planet.c1, 0.55); ctx.lineWidth = 2;
+  ctx.shadowColor = planet.c1; ctx.shadowBlur = 14; ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  ctx.save();
+  ctx.beginPath(); ctx.arc(centerX, centerY, trackRadius*0.72, 0, PI2);
+  ctx.setLineDash([6, 14]); ctx.lineDashOffset = -(t*26) % 20;
+  ctx.strokeStyle = hexA(planet.c3, 0.28); ctx.lineWidth = 1.4; ctx.stroke();
+  ctx.restore();
+
+  trackArrowOffset = (trackArrowOffset + 0.0045 * globalSpeedMultiplier * dt) % (PI2/10);
+  ctx.fillStyle = 'rgba(255,255,255,0.35)';
+  for (let i = 0; i < 10; i++) {
+    const a = (i * (PI2/10)) + trackArrowOffset;
+    const ax = centerX + Math.cos(a)*trackRadius;
+    const ay = centerY + Math.sin(a)*trackRadius;
+    ctx.save();
+    ctx.translate(ax, ay); ctx.rotate(a + Math.PI/2);
+    ctx.beginPath();
+    ctx.moveTo(0, -4.5); ctx.lineTo(-3.6, 3.6); ctx.lineTo(3.6, 3.6);
+    ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+
+  for (let i = 0; i < gates.length; i++) {
+    const g = gates[i];
+    const gx = centerX + Math.cos(g)*trackRadius;
+    const gy = centerY + Math.sin(g)*trackRadius;
+    const pulse = 0.72 + Math.sin(t*4 + i)*0.28;
+    ctx.save();
+    ctx.translate(gx, gy); ctx.rotate(g + Math.PI/2);
+    const fgd = ctx.createLinearGradient(0, -12, 0, 12);
+    fgd.addColorStop(0, 'rgba(0,240,255,0)');
+    fgd.addColorStop(0.5, `rgba(0,240,255,${0.35*pulse})`);
+    fgd.addColorStop(1, 'rgba(0,240,255,0)');
+    ctx.fillStyle = fgd; ctx.fillRect(-9, -12, 18, 24);
+    ctx.fillStyle = '#00f0ff';
+    ctx.shadowColor = '#00f0ff'; ctx.shadowBlur = 14*pulse;
+    ctx.fillRect(-12, -5, 5, 10); ctx.fillRect(7, -5, 5, 10);
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = `rgba(255,255,255,${0.6+pulse*0.4})`; ctx.lineWidth = 1.8;
+    ctx.beginPath(); ctx.moveTo(-7, 0); ctx.lineTo(7, 0); ctx.stroke();
+    ctx.restore();
+  }
+
+  const mult = getIncomeMultiplier();
+  for (const ship of ships) {
+    const tier = SHIP_TIERS[clamp(ship.level, 1, SHIP_TIERS.length) - 1];
+    const prevAngle = ship.angle;
+    ship.angle = (ship.angle + ship.speed * globalSpeedMultiplier * dt) % PI2;
+
+    for (let gi = 0; gi < gates.length; gi++) {
+      const g = gates[gi];
+      const crossed = (prevAngle < g && ship.angle >= g && (ship.angle - prevAngle) < Math.PI) ||
+                     (prevAngle > ship.angle && prevAngle > Math.PI*1.7 && ship.angle < Math.PI*0.3);
+      if (crossed) {
+        const base = 20 * tier.value;
+        const earned = Math.max(1, Math.floor(base * mult));
+        coins += earned;
+        incomeWindow.push({ t: performance.now(), v: earned });
+        const gx = centerX + Math.cos(g)*trackRadius;
+        const gy = centerY + Math.sin(g)*trackRadius;
+        spawnFloatingText(gx, gy - 6, '+' + formatNumber(earned), tier.color);
+        audio.playCoin(0.85 + ship.level * 0.07);
+        scheduleUIUpdate();
+      }
+    }
+
+    const sx = centerX + Math.cos(ship.angle)*trackRadius;
+    const sy = centerY + Math.sin(ship.angle)*trackRadius;
+    ship.trail.push({ x: sx, y: sy, alpha: 0.85 });
+    if (ship.trail.length > 10) ship.trail.shift();
+    for (let ti = 0; ti < ship.trail.length; ti++) {
+      const p = ship.trail[ti];
+      p.alpha -= 0.085 * dt;
+      if (p.alpha > 0) {
+        ctx.globalAlpha = p.alpha * 0.45;
+        ctx.fillStyle = tier.color;
+        ctx.beginPath(); ctx.arc(p.x, p.y, 2.4 + ti*0.42, 0, PI2); ctx.fill();
+      }
+    }
+    ctx.globalAlpha = 1;
+    drawShip(sx, sy, ship.angle, tier, ship.level);
+  }
+
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.x += p.vx * dt; p.y += p.vy * dt;
+    p.vx *= p.drag; p.vy *= p.drag;
+    p.life -= p.decay * dt;
+    if (p.life <= 0) { particles.splice(i, 1); continue; }
+    ctx.globalAlpha = p.life;
+    ctx.fillStyle = p.color;
+    ctx.shadowColor = p.color; ctx.shadowBlur = 8;
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.size * p.life, 0, PI2); ctx.fill();
+  }
+  ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+
+  for (let i = shockwaves.length - 1; i >= 0; i--) {
+    const s = shockwaves[i];
+    s.r += s.speed * dt;
+    s.life -= 0.022 * dt;
+    if (s.life <= 0 || s.r > s.maxR) { shockwaves.splice(i, 1); continue; }
+    ctx.globalAlpha = s.life * 0.7;
+    ctx.strokeStyle = s.color;
+    ctx.lineWidth = 2.4 * s.life + 0.4;
+    ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, PI2); ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+
+  for (let i = floatingTexts.length - 1; i >= 0; i--) {
+    const f = floatingTexts[i];
+    f.y += f.vy * dt;
+    f.life -= 0.021 * dt;
+    if (f.life <= 0) { floatingTexts.splice(i, 1); continue; }
+    ctx.globalAlpha = clamp(f.life, 0, 1);
+    ctx.fillStyle = f.color;
+    ctx.shadowColor = f.color; ctx.shadowBlur = 9;
+    ctx.font = 'bold 15px Orbitron, sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(f.text, f.x, f.y);
+  }
+  ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+  ctx.restore();
+
+  fpsAccum += dtMs;
+  if (fpsAccum > 500) {
+    const cutoff = performance.now() - 5000;
+    incomeWindow = incomeWindow.filter(e => e.t > cutoff);
+    let sum = 0; for (const e of incomeWindow) sum += e.v;
+    coinRate = sum / 5;
+    fpsAccum = 0;
+    scheduleUIUpdate();
+  }
+  requestAnimationFrame(gameLoop);
+}
+
+/* ---------- game logic ---------- */
+function getIncomeMultiplier() {
+  const pm = PLANETS[selectedPlanetIndex] ? PLANETS[selectedPlanetIndex].mult : 1;
+  return pm * (1 + rebirths * 0.25);
+}
+function makeShip(level, angle) {
+  const tier = SHIP_TIERS[clamp(level, 1, SHIP_TIERS.length) - 1];
+  return { level: tier.level, angle, speed: tier.speed, trail: [] };
+}
+function addShip(level = 1, angle = null) {
+  if (ships.length >= maxShipCapacity) return false;
+  ships.push(makeShip(level, angle === null ? Math.random()*PI2 : angle));
+  return true;
+}
+function findFreeAngle() {
+  let bestAngle = 0, bestDist = -1;
+  const STEPS = 48;
+  for (let i = 0; i < STEPS; i++) {
+    const a = (i/STEPS) * PI2;
+    let nearest = PI2;
+    for (const g of gates) {
+      let d = Math.abs(a - g) % PI2;
+      d = Math.min(d, PI2 - d);
+      if (d < nearest) nearest = d;
+    }
+    if (nearest > bestDist) { bestDist = nearest; bestAngle = a; }
+  }
+  return bestAngle;
+}
+function findMergeablePair() {
+  const seen = new Map();
+  for (let i = 0; i < ships.length; i++) {
+    const lvl = ships[i].level;
+    if (lvl >= SHIP_TIERS.length) continue;
+    if (seen.has(lvl)) return [seen.get(lvl), i];
+    seen.set(lvl, i);
+  }
+  return null;
+}
+function buyShip() {
+  if (coins < shipCost || ships.length >= maxShipCapacity) { audio.playError(); return; }
+  coins -= shipCost;
+  const a = findFreeAngle();
+  addShip(1, a);
+  shipCost = Math.floor(shipCost * 1.22);
+  audio.playUpgrade();
+  spawnShockwave(centerX + Math.cos(a)*trackRadius, centerY + Math.sin(a)*trackRadius, '#00ff66', 0.6);
+  updateUI();
+}
+function buyGate() {
+  if (coins < gateCost || gates.length >= 12) { audio.playError(); return; }
+  coins -= gateCost;
+  const a = findFreeAngle();
+  gates.push(a);
+  gateCost = Math.floor(gateCost * 1.55);
+  audio.playUpgrade();
+  spawnShockwave(centerX + Math.cos(a)*trackRadius, centerY + Math.sin(a)*trackRadius, '#00f0ff', 0.7);
+  updateUI();
+}
+function mergeShips() {
+  const pair = findMergeablePair();
+  if (!pair || coins < mergeCost) { audio.playError(); return; }
+  const [i, j] = pair;
+  coins -= mergeCost;
+  const angle = ships[i].angle;
+  const newLevel = Math.min(ships[i].level + 1, SHIP_TIERS.length);
+  const tier = SHIP_TIERS[newLevel - 1];
+  ships.splice(j, 1);
+  ships.splice(i, 1);
+  ships.push(makeShip(newLevel, angle));
+  const px = centerX + Math.cos(angle)*trackRadius;
+  const py = centerY + Math.sin(angle)*trackRadius;
+  spawnExplosion(px, py, tier.color, 26);
+  spawnShockwave(px, py, tier.color, 1.0);
+  screenShake(9, 0.32);
+  audio.playMerge();
+  mergeCost = Math.floor(mergeCost * 1.18);
+  updateUI();
+}
+function buyOrMerge(what) {
+  if (what === 'ship') buyShip();
+  else if (what === 'gate') buyGate();
+  else if (what === 'merge') mergeShips();
+}
+function doRebirth(rebirthGain, keyGain, cost) {
+  if (coins < cost) { audio.playError(); return; }
+  coins = 0;
+  rebirths += rebirthGain;
+  keys += keyGain;
+  ships = [];
+  gates = [0, Math.PI];
+  shipCost = 100; gateCost = 150; mergeCost = 50;
+  addShip(1, 0); addShip(1, Math.PI);
+  rebirthBaseCost = Math.floor(rebirthBaseCost * 2.4);
+  audio.playRebirth();
+  screenShake(16, 0.6);
+  spawnShockwave(centerX, centerY, '#c084fc', 2.4);
+  closeRebirthModal();
+  showCenterToast(`♻️ REBIRTH +${rebirthGain} · +${keyGain} 🔑`);
+  updateUI();
+  saveGame(true);
+}
+function craftKeyFromRebirths() {
+  if (rebirths < 4) { audio.playError(); return; }
+  rebirths -= 4;
+  keys += 1;
+  audio.playUpgrade();
+  showCenterToast('🔑 CRAFTED 1 PLANET KEY');
+  updateUI();
+}
+function selectPlanet(idx) {
+  if (!unlockedPlanets.includes(idx)) return;
+  selectedPlanetIndex = idx;
+  audio.playUpgrade();
+  spawnShockwave(centerX, centerY, PLANETS[idx].c1, 1.1);
+  updateUI();
+  renderPlanetsList();
+}
+function unlockPlanet(idx) {
+  const p = PLANETS[idx];
+  if (!p || unlockedPlanets.includes(idx)) return;
+  if (keys < p.keysNeeded) { audio.playError(); return; }
+  keys -= p.keysNeeded;
+  unlockedPlanets.push(idx);
+  unlockedPlanets.sort((a, b) => a - b);
+  selectedPlanetIndex = idx;
+  audio.playUnlock();
+  spawnShockwave(centerX, centerY, p.c1, 1.6);
+  showCenterToast(`🪐 UNLOCKED ${p.name.toUpperCase()}`);
+  updateUI();
+  renderPlanetsList();
+  saveGame(true);
+}
+function handleTurboClick() {
+  if (hasUnlimitedFlash || flashTimer > 0) toggleTurbo();
+  else openFlashModal();
+}
+function toggleTurbo() {
+  isTurbo = !isTurbo;
+  globalSpeedMultiplier = isTurbo ? 2.5 : 1;
+  updateUI();
+}
+
+let uiPending = false;
+function scheduleUIUpdate() {
+  if (uiPending) return;
+  uiPending = true;
+  requestAnimationFrame(() => { uiPending = false; updateUI(); });
+}
+function updateUI() {
+  $('coin-count').innerText = formatNumber(coins);
+  $('coin-rate').innerText = '+' + formatNumber(coinRate) + '/s';
+  $('rebirth-count-text').innerText = formatNumber(rebirths);
+  $('key-count-text').innerText = formatNumber(keys);
+  $('income-mult-text').innerText = formatNumber(getIncomeMultiplier()) + 'x';
+  $('cost-ship').innerText = formatNumber(shipCost);
+  $('cost-gate').innerText = formatNumber(gateCost);
+  $('cost-merge').innerText = formatNumber(mergeCost);
+  $('ship-cap-text').innerText = `${ships.length}/${maxShipCapacity}`;
+  $('gate-count-text').innerText = gates.length;
+  const p = PLANETS[selectedPlanetIndex];
+  $('active-planet-text').innerText = p.name.toUpperCase();
+  $('unlocked-count-text').innerText = `${unlockedPlanets.length}/${TOTAL_PLANETS}`;
+  $('planet-dot').style.background = p.c1;
+  $('planet-dot').style.boxShadow = `0 0 8px ${p.c1}`;
+  const badge = $('flash-badge');
+  if (hasUnlimitedFlash) {
+    badge.classList.remove('hidden');
+    badge.innerText = '∞';
+  } else if (flashTimer > 0) {
+    badge.classList.remove('hidden');
+    const m = Math.floor(flashTimer/60), s = flashTimer % 60;
+    badge.innerText = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  } else badge.classList.add('hidden');
+
+  const turboBtn = $('btn-turbo');
+  const turboIcon = $('turbo-icon');
+  if (isTurbo) {
+    turboBtn.classList.add('bg-amber-500/30', 'neon-border-gold');
+    turboIcon.classList.add('animate-spin');
+  } else {
+    turboBtn.classList.remove('bg-amber-500/30', 'neon-border-gold');
+    turboIcon.classList.remove('animate-spin');
+  }
+  const canMerge = !!findMergeablePair();
+  $('btn-merge').disabled = coins < mergeCost || !canMerge;
+  $('merge-ready-badge').classList.toggle('hidden', !canMerge);
+  $('btn-ship').disabled = coins < shipCost || ships.length >= maxShipCapacity;
+  $('btn-gate').disabled = coins < gateCost || gates.length >= 12;
+  $('btn-rebirth-1m').disabled = coins < rebirthBaseCost;
+  $('btn-rebirth-2m').disabled = coins < rebirthBaseCost * 8;
+  $('btn-rebirth-1m').innerText = 'REBIRTH ' + formatNumber(rebirthBaseCost);
+  $('btn-rebirth-2m').innerText = 'REBIRTH ' + formatNumber(rebirthBaseCost * 8);
+  $('btn-craft-key').disabled = rebirths < 4;
+
+  if (currentUser) $('account-name').innerText = currentUser.toUpperCase();
+  else $('account-name').innerText = 'GUEST';
+}
+
+let toastTimer = null;
+function showCenterToast(msg) {
+  const wrap = $('center-message');
+  const text = $('center-message-text');
+  text.innerText = msg;
+  wrap.classList.remove('opacity-0', 'translate-y-2');
+  wrap.classList.add('opacity-100', 'translate-y-0');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    wrap.classList.add('opacity-0', 'translate-y-2');
+    wrap.classList.remove('opacity-100', 'translate-y-0');
+  }, 2300);
+}
+
+function planetRowHTML(p) {
+  const isUnlocked = unlockedPlanets.includes(p.index);
+  const isSelected = selectedPlanetIndex === p.index;
+  const canAfford = keys >= p.keysNeeded;
+  let actionHTML;
+  if (isSelected) actionHTML = `<span class="text-[10px] font-orbitron text-amber-400 font-extrabold px-2.5 py-1 rounded-full bg-amber-500/20 border border-amber-400/40 whitespace-nowrap">EQUIPPED</span>`;
+  else if (isUnlocked) actionHTML = `<button data-action="equip" data-idx="${p.index}" class="py-1.5 px-3 rounded-xl bg-cyan-600/80 text-white font-orbitron font-bold text-[10px] hover:bg-cyan-500 active:scale-95 transition whitespace-nowrap">EQUIP</button>`;
+  else actionHTML = `<button data-action="unlock" data-idx="${p.index}" ${canAfford ? '' : 'disabled'} class="py-1.5 px-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-orbitron font-bold text-[10px] hover:brightness-110 active:scale-95 transition disabled:opacity-35 disabled:cursor-not-allowed whitespace-nowrap">${p.keysNeeded} 🔑</button>`;
+  const ringStyle = `radial-gradient(circle at 32% 30%, ${p.c1}, ${p.c2})`;
+  const borderClass = isSelected ? 'border-amber-400 bg-amber-950/25' : isUnlocked ? 'border-cyan-500/40 bg-gray-900/60' : 'border-gray-800 bg-gray-950/50';
+  return `
+    <div class="planet-row p-2.5 rounded-2xl border ${borderClass} flex items-center justify-between gap-2.5">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="planet-chip w-9 h-9 shrink-0 rounded-full border border-white/20 shadow-md relative" style="background:${ringStyle}; box-shadow:0 0 14px ${hexA(p.c1, 0.4)}">
+          ${p.ring ? `<div class="absolute inset-0 rounded-full pointer-events-none" style="transform:rotate(${p.ringTilt}rad); border-top:2px solid ${hexA(p.c3, 0.7)}; border-bottom:2px solid ${hexA(p.c3, 0.7)};"></div>` : ''}
+        </div>
+        <div class="min-w-0">
+          <div class="font-orbitron font-bold text-[11px] text-white flex items-center gap-1.5 flex-wrap">
+            <span class="truncate max-w-[140px] sm:max-w-none">#${p.index + 1} ${p.name}</span>
+            <span class="text-[10px] text-amber-400 font-bold">${formatNumber(p.mult)}x</span>
+          </div>
+          <div class="text-[10px] text-gray-400 leading-tight truncate">${p.desc}</div>
+        </div>
+      </div>
+      <div class="shrink-0">${actionHTML}</div>
+    </div>`;
+}
+function renderPlanetsList() {
+  const container = $('planets-list');
+  const term = planetSearchTerm.toLowerCase();
+  const list = PLANETS.filter(p => {
+    if (planetFilter === 'owned' && !unlockedPlanets.includes(p.index)) return false;
+    if (planetFilter === 'locked' && unlockedPlanets.includes(p.index)) return false;
+    if (term && !(p.name.toLowerCase().includes(term) || p.type.toLowerCase().includes(term) || String(p.index + 1) === term)) return false;
+    return true;
+  });
+  if (!list.length) { container.innerHTML = `<div class="text-center text-[11px] text-gray-500 py-6 font-orbitron">NO WORLDS MATCH</div>`; return; }
+  let html = '';
+  for (const p of list) html += planetRowHTML(p);
+  container.innerHTML = html;
+}
+function renderCodex() {
+  const container = $('codex-grid');
+  const maxLevel = ships.length ? Math.max(...ships.map(s => s.level)) : 1;
+  let html = '';
+  SHIP_TIERS.forEach(tier => {
+    const isUnlocked = tier.level <= maxLevel;
+    html += `<div class="p-3 rounded-2xl border ${isUnlocked ? 'border-cyan-500/50 bg-cyan-950/20' : 'border-gray-800 bg-gray-900/40 opacity-55'} flex flex-col items-center text-center gap-1.5">
+      <div class="text-[11px] font-orbitron text-cyan-400 font-bold">T${tier.level}</div>
+      <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm" style="background:${isUnlocked ? tier.color : '#2a2a35'}; box-shadow:${isUnlocked ? '0 0 14px ' + hexA(tier.color, 0.6) : 'none'}">${isUnlocked ? '🚀' : '🔒'}</div>
+      <div class="text-[11px] font-bold text-white tracking-wide leading-tight">${tier.name}</div>
+      <div class="text-[10px] text-amber-400 font-extrabold">+${formatNumber(tier.value * 20)}/gate</div>
+    </div>`;
+  });
+  container.innerHTML = html;
+}
+
+/* ---------- auth ---------- */
+function showAuthScreen() { $('screen-auth').classList.remove('hidden'); $('screen-auth').classList.add('flex'); setTimeout(() => $('auth-username').focus(), 100); }
+function hideAuthScreen() { $('screen-auth').classList.add('hidden'); $('screen-auth').classList.remove('flex'); }
+function setAuthMode(mode) {
+  authMode = mode;
+  $('tab-login').classList.toggle('active', mode === 'login');
+  $('tab-register').classList.toggle('active', mode === 'register');
+  $('btn-auth-submit').innerText = mode === 'login' ? 'ENTER THE ORBIT' : 'CREATE COMMANDER';
+  showAuthError('');
+}
+function showAuthError(msg) { const el = $('auth-error'); if (!msg) { el.classList.add('hidden'); el.innerText = ''; return; } el.innerText = msg; el.classList.remove('hidden'); }
+function setServerStatus(ok, text) {
+  $('server-status').className = 'w-2 h-2 rounded-full ' + (ok ? 'bg-green-500' : 'bg-yellow-500');
+  $('server-status-text').innerText = text;
+}
+
+async function submitAuth() {
+  const username = ($('auth-username').value || '').trim();
+  const password = $('auth-password').value || '';
+  if (username.length < 3) return showAuthError('Commander name must be at least 3 characters.');
+  if (!/^[A-Za-z0-9_\- ]+$/.test(username)) return showAuthError('Only letters, numbers, spaces, _ and -');
+  if (password.length < 3) return showAuthError('Access code must be at least 3 characters.');
+
+  $('btn-auth-submit').disabled = true;
+  $('btn-auth-submit').innerText = 'CONNECTING…';
+
+  if (usingServer) {
+    const res = authMode === 'register' ? await API.register(username, password) : await API.login(username, password);
+    if (res.ok && res.data.token) {
+      authToken = res.data.token;
+      currentUser = res.data.display;
+      try { localStorage.setItem(STORAGE.TOKEN, authToken); localStorage.setItem(STORAGE.CURRENT, currentUser); } catch {}
+      $('btn-auth-submit').disabled = false;
+      $('btn-auth-submit').innerText = authMode === 'login' ? 'ENTER THE ORBIT' : 'CREATE COMMANDER';
+      audio.playUpgrade();
+      startSession(true);
+      return;
+    }
+    if (res.status !== 0 && res.data && res.data.error) {
+      showAuthError(res.data.error);
+      $('btn-auth-submit').disabled = false;
+      $('btn-auth-submit').innerText = authMode === 'login' ? 'ENTER THE ORBIT' : 'CREATE COMMANDER';
+      return;
+    }
+  }
+
+  const accounts = local.accounts();
+  const key = username.toLowerCase();
+  if (authMode === 'register') {
+    if (accounts[key]) {
+      showAuthError('That commander name is already taken.');
+      $('btn-auth-submit').disabled = false;
+      $('btn-auth-submit').innerText = 'CREATE COMMANDER';
+      return;
+    }
+    accounts[key] = { display: username, hash: lhash(password), created: Date.now(), save: null };
+    local.setAccounts(accounts);
+  } else {
+    const acc = accounts[key];
+    if (!acc || acc.hash !== lhash(password)) {
+      showAuthError('Invalid credentials.');
+      $('btn-auth-submit').disabled = false;
+      $('btn-auth-submit').innerText = 'ENTER THE ORBIT';
+      return;
+    }
+  }
+  local.setUser(key);
+  currentUser = username;
+  authToken = null;
+  $('btn-auth-submit').disabled = false;
+  $('btn-auth-submit').innerText = authMode === 'login' ? 'ENTER THE ORBIT' : 'CREATE COMMANDER';
+  audio.playUpgrade();
+  startSession(true);
+}
+function playAsGuest() {
+  currentUser = null; authToken = null;
+  try { localStorage.removeItem(STORAGE.CURRENT); localStorage.removeItem(STORAGE.TOKEN); } catch {}
+  startSession(true);
+}
+function logout() {
+  saveGame(true);
+  currentUser = null; authToken = null;
+  try { localStorage.removeItem(STORAGE.CURRENT); localStorage.removeItem(STORAGE.TOKEN); } catch {}
+  resetStateToDefaults();
+  updateUI();
+  showAuthScreen();
+}
+function resetStateToDefaults() {
+  coins = 100; rebirths = 0; keys = 0;
+  selectedPlanetIndex = 0; unlockedPlanets = [0];
+  maxShipCapacity = 8; shipCost = 100; gateCost = 150; mergeCost = 50;
+  rebirthBaseCost = 1e6;
+  isTurbo = false; globalSpeedMultiplier = 1;
+  hasUnlimitedFlash = false; flashTimer = 0;
+  ships = []; gates = [0, Math.PI];
+  floatingTexts = []; particles = []; shockwaves = [];
+  incomeWindow = []; coinRate = 0;
+}
+
+/* ---------- save / load ---------- */
+let lastSave = 0;
+function collectSave() {
+  return {
+    v: 3, coins, rebirths, keys,
+    selectedPlanetIndex,
+    unlockedPlanets: unlockedPlanets.slice(),
+    ships: ships.map(s => s.level),
+    gates: gates.slice(),
+    shipCost, gateCost, mergeCost, maxShipCapacity, rebirthBaseCost,
+    hasUnlimitedFlash, flashTimer,
+    savedAt: Date.now()
+  };
+}
+function applySave(data) {
+  if (!data || typeof data !== 'object') return;
+  if (typeof data.coins === 'number' && isFinite(data.coins)) coins = Math.max(0, data.coins);
+  if (typeof data.rebirths === 'number' && isFinite(data.rebirths)) rebirths = Math.max(0, Math.floor(data.rebirths));
+  if (typeof data.keys === 'number' && isFinite(data.keys)) keys = Math.max(0, Math.floor(data.keys));
+  if (Array.isArray(data.unlockedPlanets)) {
+    unlockedPlanets = data.unlockedPlanets.filter(i => Number.isInteger(i) && i >= 0 && i < TOTAL_PLANETS);
+    if (!unlockedPlanets.includes(0)) unlockedPlanets.unshift(0);
+    unlockedPlanets = Array.from(new Set(unlockedPlanets)).sort((a,b) => a-b);
+  } else unlockedPlanets = [0];
+  if (Number.isInteger(data.selectedPlanetIndex) && unlockedPlanets.includes(data.selectedPlanetIndex)) selectedPlanetIndex = data.selectedPlanetIndex;
+  else selectedPlanetIndex = unlockedPlanets[unlockedPlanets.length - 1] || 0;
+  if (typeof data.shipCost === 'number' && data.shipCost > 0) shipCost = Math.floor(data.shipCost);
+  if (typeof data.gateCost === 'number' && data.gateCost > 0) gateCost = Math.floor(data.gateCost);
+  if (typeof data.mergeCost === 'number' && data.mergeCost > 0) mergeCost = Math.floor(data.mergeCost);
+  if (typeof data.rebirthBaseCost === 'number' && data.rebirthBaseCost > 0) rebirthBaseCost = data.rebirthBaseCost;
+  if (typeof data.maxShipCapacity === 'number' && data.maxShipCapacity >= 2) maxShipCapacity = Math.min(20, Math.floor(data.maxShipCapacity));
+  if (typeof data.hasUnlimitedFlash === 'boolean') hasUnlimitedFlash = data.hasUnlimitedFlash;
+  if (typeof data.flashTimer === 'number' && data.flashTimer >= 0) flashTimer = Math.floor(data.flashTimer);
+  ships = [];
+  if (Array.isArray(data.ships) && data.ships.length) {
+    data.ships.slice(0, maxShipCapacity).forEach((lvl, idx) => {
+      const L = clamp(parseInt(lvl, 10) || 1, 1, SHIP_TIERS.length);
+      ships.push(makeShip(L, (idx / Math.max(1, data.ships.length)) * PI2));
+    });
+  }
+  if (Array.isArray(data.gates) && data.gates.length >= 2) {
+    gates = data.gates.filter(a => typeof a === 'number' && isFinite(a)).slice(0, 12).map(a => ((a % PI2) + PI2) % PI2);
+    if (gates.length < 2) gates = [0, Math.PI];
+  }
+  if (hasUnlimitedFlash || flashTimer > 0) { isTurbo = true; globalSpeedMultiplier = 2.5; }
+  else { isTurbo = false; globalSpeedMultiplier = 1; }
+}
+async function saveGame(force = false) {
+  const now = Date.now();
+  if (!force && now - lastSave < 1500) return;
+  lastSave = now;
+  const payload = collectSave();
+  if (authToken && usingServer) {
+    const res = await API.postSave(payload);
+    if (res.ok) { setSaveStatus('SAVED'); return; }
+  }
+  try {
+    if (currentUser) {
+      const accounts = local.accounts();
+      const key = currentUser.toLowerCase();
+      if (accounts[key]) { accounts[key].save = payload; accounts[key].lastPlayed = now; local.setAccounts(accounts); }
+      setSaveStatus('SAVED');
+    } else {
+      localStorage.setItem(STORAGE.GUEST, JSON.stringify(payload));
+      setSaveStatus('SAVED');
+    }
+  } catch (e) {}
+}
+function setSaveStatus(txt) {
+  const el = $('save-status'); if (!el) return;
+  el.innerText = txt;
+  setTimeout(() => { el.innerText = ''; }, 1500);
+}
+async function loadGame() {
+  let data = null;
+  if (authToken && usingServer) {
+    const res = await API.getSave();
+    if (res.ok && res.data.save) data = res.data.save;
+  }
+  if (!data) {
+    try {
+      if (currentUser) {
+        const accounts = local.accounts();
+        const acc = accounts[currentUser.toLowerCase()];
+        data = acc && acc.save ? acc.save : null;
+      } else {
+        const raw = localStorage.getItem(STORAGE.GUEST);
+        data = raw ? JSON.parse(raw) : null;
+      }
+    } catch (e) { data = null; }
+  }
+  if (data) applySave(data);
+}
+
+/* ---------- leaderboard ---------- */
+async function openLeaderboard() {
+  const modal = $('modal-leaderboard');
+  modal.classList.remove('hidden'); modal.classList.add('flex');
+  await refreshLeaderboard();
+}
+function closeLeaderboard() { const m = $('modal-leaderboard'); m.classList.add('hidden'); m.classList.remove('flex'); }
+async function refreshLeaderboard() {
+  const container = $('lb-list');
+  const subtitle = $('lb-subtitle');
+  container.innerHTML = `<div class="text-center text-gray-500 text-xs py-8 font-orbitron">LOADING…</div>`;
+  let leaders = [];
+  let source = 'local';
+  if (usingServer) {
+    const res = await API.leaderboard(lbSort, 50);
+    if (res.ok && Array.isArray(res.data.leaders)) { leaders = res.data.leaders; source = 'server'; }
+  }
+  if (source === 'local') {
+    const accounts = local.accounts();
+    const arr = [];
+    for (const key in accounts) {
+      const a = accounts[key];
+      if (!a.save) continue;
+      arr.push({ username: a.display || key, coins: a.save.coins || 0, rebirths: a.save.rebirths || 0, planets: (a.save.unlockedPlanets || []).length });
+    }
+    if (arr.length === 0 && currentUser === null) {
+      try {
+        const g = JSON.parse(localStorage.getItem(STORAGE.GUEST) || 'null');
+        if (g) arr.push({ username: 'You (Guest)', coins: g.coins || 0, rebirths: g.rebirths || 0, planets: (g.unlockedPlanets || []).length });
+      } catch {}
+    }
+    if (lbSort === 'rebirths') arr.sort((a,b) => b.rebirths - a.rebirths || b.coins - a.coins);
+    else if (lbSort === 'planets') arr.sort((a,b) => b.planets - a.planets || b.coins - a.coins);
+    else arr.sort((a,b) => b.coins - a.coins || b.rebirths - a.rebirths);
+    leaders = arr;
+  }
+  subtitle.innerText = source === 'server' ? `Live server rankings · ${leaders.length} commanders` : `Local rankings (offline) · ${leaders.length} commanders`;
+  if (!leaders.length) { container.innerHTML = `<div class="text-center text-gray-500 text-xs py-8 font-orbitron">NO COMMANDERS YET</div>`; return; }
+  let html = '';
+  leaders.forEach((r, i) => {
+    const rank = i + 1;
+    const medal = rank <= 3 ? `medal-${rank}` : '';
+    const medalIcon = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`;
+    const val = lbSort === 'rebirths' ? `${formatNumber(r.rebirths)} ♻️`
+              : lbSort === 'planets' ? `${r.planets} 🪐`
+              : `${formatNumber(r.coins)} 💰`;
+    html += `
+      <div class="lb-row p-3 rounded-2xl border ${medal || 'border-gray-800/60 bg-black/30'} flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-8 text-center font-orbitron font-black text-sm ${rank <= 3 ? 'text-amber-300' : 'text-gray-500'}">${medalIcon}</div>
+          <div class="min-w-0">
+            <div class="font-orbitron font-bold text-xs text-white truncate">${escapeHTML(r.username)}</div>
+            <div class="text-[10px] text-gray-400">${r.planets} planets · ${formatNumber(r.rebirths)} rebirths</div>
+          </div>
+        </div>
+        <div class="font-orbitron font-extrabold text-xs text-amber-300 whitespace-nowrap">${val}</div>
+      </div>`;
+  });
+  container.innerHTML = html;
+}
+function escapeHTML(s) { return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
+
+/* ---------- modals ---------- */
+function openModal(id) { const e = $(id); e.classList.remove('hidden'); e.classList.add('flex'); }
+function closeModal(id) { const e = $(id); e.classList.add('hidden'); e.classList.remove('flex'); }
+function openShop() { renderPlanetsList(); updateUI(); openModal('modal-shop'); }
+function closeShop() { closeModal('modal-shop'); }
+function openRebirthModal() { updateUI(); openModal('modal-rebirth'); }
+function closeRebirthModal() { closeModal('modal-rebirth'); }
+function openFlashModal() { openModal('modal-flash'); }
+function closeFlashModal() { closeModal('modal-flash'); }
+function openCodex() { renderCodex(); openModal('modal-codex'); }
+function closeCodex() { closeModal('modal-codex'); }
+
+function startAdSimulation() {
+  closeFlashModal();
+  const modal = $('modal-ad');
+  const timerEl = $('ad-timer-countdown');
+  const barEl = $('ad-progress-bar');
+  const claimBtn = $('btn-claim-ad-reward');
+  claimBtn.classList.add('hidden');
+  barEl.style.width = '0%';
+  timerEl.innerText = '10s';
+  modal.classList.remove('hidden'); modal.classList.add('flex');
+  let elapsed = 0; const duration = 10;
+  clearInterval(startAdSimulation._i);
+  startAdSimulation._i = setInterval(() => {
+    elapsed++;
+    const remaining = duration - elapsed;
+    barEl.style.width = `${(elapsed/duration)*100}%`;
+    timerEl.innerText = remaining > 0 ? remaining + 's' : 'DONE!';
+    if (remaining <= 0) { clearInterval(startAdSimulation._i); claimBtn.classList.remove('hidden'); }
+  }, 1000);
+}
+function claimAdReward() {
+  const modal = $('modal-ad');
+  modal.classList.add('hidden'); modal.classList.remove('flex');
+  flashTimer += 300;
+  isTurbo = true; globalSpeedMultiplier = 2.5;
+  audio.playUpgrade();
+  showCenterToast('⚡ +5 MINUTES FLASH BOOST');
+  updateUI(); saveGame(true);
+}
+function toggleAudio() {
+  audio.init();
+  audio.muted = !audio.muted;
+  $('btn-audio').innerText = audio.muted ? '🔇' : '🔊';
+  if (!audio.muted) audio.playCoin(1);
+}
+
+/* ---------- wiring ---------- */
+function bindUI() {
+  $('btn-shop').addEventListener('click', openShop);
+  $('btn-close-shop').addEventListener('click', closeShop);
+  $('btn-turbo').addEventListener('click', handleTurboClick);
+  $('btn-codex').addEventListener('click', openCodex);
+  $('btn-close-codex').addEventListener('click', closeCodex);
+  $('btn-audio').addEventListener('click', toggleAudio);
+  $('btn-rebirth-modal').addEventListener('click', openRebirthModal);
+  $('btn-close-rebirth').addEventListener('click', closeRebirthModal);
+  $('btn-leaderboard').addEventListener('click', openLeaderboard);
+  $('btn-close-leaderboard').addEventListener('click', closeLeaderboard);
+  $('btn-lb-refresh').addEventListener('click', refreshLeaderboard);
+
+  $('btn-save-now').addEventListener('click', () => { saveGame(true); showCenterToast(currentUser ? '💾 PROGRESS SAVED' : '💾 GUEST SAVE UPDATED'); });
+  $('btn-logout').addEventListener('click', logout);
+
+  $('tab-login').addEventListener('click', () => setAuthMode('login'));
+  $('tab-register').addEventListener('click', () => setAuthMode('register'));
+  $('btn-auth-submit').addEventListener('click', submitAuth);
+  $('btn-auth-guest').addEventListener('click', playAsGuest);
+  $('auth-password').addEventListener('keydown', e => { if (e.key === 'Enter') submitAuth(); });
+  $('auth-username').addEventListener('keydown', e => { if (e.key === 'Enter') $('auth-password').focus(); });
+
+  $('btn-ship').addEventListener('click', buyShip);
+  $('btn-gate').addEventListener('click', buyGate);
+  $('btn-merge').addEventListener('click', mergeShips);
+  $('btn-rebirth-1m').addEventListener('click', () => doRebirth(4, 1, Math.floor(rebirthBaseCost)));
+  $('btn-rebirth-2m').addEventListener('click', () => doRebirth(12, 3, Math.floor(rebirthBaseCost * 8)));
+  $('btn-craft-key').addEventListener('click', craftKeyFromRebirths);
+  $('btn-watch-ad').addEventListener('click', startAdSimulation);
+  $('btn-claim-ad-reward').addEventListener('click', claimAdReward);
+  $('btn-close-flash-modal').addEventListener('click', closeFlashModal);
+
+  $('planets-list').addEventListener('click', e => {
+    const btn = e.target.closest('button[data-action]');
+    if (!btn) return;
+    const idx = parseInt(btn.dataset.idx, 10);
+    if (btn.dataset.action === 'unlock') unlockPlanet(idx);
+    else if (btn.dataset.action === 'equip') selectPlanet(idx);
+  });
+  document.querySelectorAll('.planet-filter').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('.planet-filter').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      planetFilter = b.dataset.filter;
+      renderPlanetsList();
+    });
+  });
+  $('planet-search').addEventListener('input', e => { planetSearchTerm = (e.target.value || '').trim(); renderPlanetsList(); });
+  document.querySelectorAll('.lb-sort').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('.lb-sort').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      lbSort = b.dataset.lbsort;
+      refreshLeaderboard();
+    });
+  });
+
+  window.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    ['modal-shop','modal-rebirth','modal-codex','modal-flash','modal-ad','modal-leaderboard'].forEach(closeModal);
+  });
+
+  window.addEventListener('beforeunload', () => saveGame(true));
+
+  // VR init
+  VR.init();
+  requestAnimationFrame(vrLoop);
+}
+
+/* ---------- session ---------- */
+async function startSession(fromAuth) {
+  hideAuthScreen();
+  resetStateToDefaults();
+  await loadGame();
+  if (!ships.length) { addShip(1, 0); addShip(1, Math.PI*0.5); }
+  if (gates.length < 2) gates = [0, Math.PI];
+  if (hasUnlimitedFlash || flashTimer > 0) { isTurbo = true; globalSpeedMultiplier = 2.5; }
+  updateUI();
+  if (fromAuth) {
+    const who = currentUser || 'GUEST';
+    setTimeout(() => showCenterToast(`🚀 WELCOME, ${who.toUpperCase()}`), 260);
+  }
+  saveGame(true);
+  setInterval(() => saveGame(false), 5000);
+}
+
+/* ---------- boot ---------- */
+async function boot() {
+  resizeCanvas();
+  window.addEventListener('resize', () => {
+    clearTimeout(boot._rt);
+    boot._rt = setTimeout(resizeCanvas, 120);
+  });
+  bindUI();
+  setAuthMode('login');
+  requestAnimationFrame(gameLoop);
+
+  setInterval(() => {
+    if (hasUnlimitedFlash) return;
+    if (flashTimer > 0) {
+      flashTimer--;
+      if (flashTimer <= 0) {
+        flashTimer = 0; isTurbo = false; globalSpeedMultiplier = 1;
+        showCenterToast('⌛ FLASH BOOST EXPIRED');
+      }
+      updateUI();
+    }
+  }, 1000);
+
+  setServerStatus(false, 'Checking server…');
+  const serverOK = await API.ping();
+  usingServer = serverOK;
+  if (serverOK) setServerStatus(true, 'Server online · ' + SERVER_URL.replace(/^https?:\/\//, ''));
+  else setServerStatus(false, 'Offline mode · using local storage');
+
+  let autoLogged = false;
+  try {
+    authToken = localStorage.getItem(STORAGE.TOKEN);
+    const savedUser = localStorage.getItem(STORAGE.CURRENT);
+    if (authToken && savedUser && serverOK) {
+      const res = await API.getSave();
+      if (res.ok || res.status === 200) { currentUser = savedUser; autoLogged = true; }
+      else { authToken = null; localStorage.removeItem(STORAGE.TOKEN); localStorage.removeItem(STORAGE.CURRENT); }
+    } else if (savedUser && local.accounts()[savedUser.toLowerCase()]) {
+      currentUser = local.accounts()[savedUser.toLowerCase()].display || savedUser;
+      autoLogged = true;
+    }
+  } catch {}
+
+  if (autoLogged) await startSession(false);
+  else { resetStateToDefaults(); showAuthScreen(); }
+}
+
+window.addEventListener('load', boot);
+</script>
+</body>
+  </html>
