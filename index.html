@@ -770,6 +770,20 @@ const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d', { alpha: false });
 const $ = id => document.getElementById(id);
 
+/* ---------- tiny mat4 helpers for WebXR (column-major for WebGL) ---------- */
+const XR_MATH = {
+  mul(a, b) {
+    const r = new Float64Array(16);
+    for (let c = 0; c < 4; c++)
+      for (let row = 0; row < 4; row++) {
+        let s = 0;
+        for (let k = 0; k < 4; k++) s += a[row + k*4] * b[k + c*4];
+        r[row + c*4] = s;
+      }
+    return r;
+  }
+};
+
 /* ============================================================
    VR ENGINE
    ============================================================ */
@@ -873,20 +887,31 @@ const VR = {
   async startXR() {
     try {
       const session = await navigator.xr.requestSession('immersive-vr', {
-        optionalFeatures: ['local-floor']
+        optionalFeatures: ['local-floor', 'bounded-floor']
       });
       this.xrSession = session;
       this.active = true;
       this.immersive = true;
       $('vr-splash').classList.add('hidden');
 
+      this.resizeEyeCanvases();
+
       const glCanvas = document.createElement('canvas');
-      const gl = glCanvas.getContext('webgl', { xrCompatible: true });
+      const gl = glCanvas.getContext('webgl', { xrCompatible: true, alpha: false });
+      if (!gl) throw new Error('WebGL unavailable');
+      this.xrGL = gl;
+      this.xrCanvas = glCanvas;
+
       session.updateRenderState({ baseLayer: new XRWebGLLayer(session, gl) });
       this.xrBaseLayer = session.renderState.baseLayer;
       this.xrRefSpace = await session.requestReferenceSpace('local');
-      this.xrGL = gl;
-      this.xrCanvas = glCanvas;
+
+      this.xrBuildProgram(gl);
+      this.xrQuad = {
+        verts: new Float32Array(6 * 5),
+        buf: gl.createBuffer(),
+        tex: gl.createTexture()
+      };
 
       session.addEventListener('end', () => {
         this.xrSession = null;
@@ -896,17 +921,114 @@ const VR = {
       const onFrame = (time, frame) => {
         if (!this.xrSession) return;
         this.xrFrameReq = session.requestAnimationFrame(onFrame);
-        const pose = frame.getViewerPose(this.xrRefSpace);
-        if (pose) {
-          // left / right eye stereo visualization update
-          this.xrPose = pose;
-        }
+        this.xrRenderFrame(gl, frame);
       };
       this.xrFrameReq = session.requestAnimationFrame(onFrame);
       this.showVRToast('🥽 WebXR immersive active');
     } catch (e) {
       console.warn('WebXR error:', e);
       this.startStereoFallback();
+    }
+  },
+
+  xrBuildProgram(gl) {
+    const vs = [
+      'attribute vec2 aPos;',
+      'attribute vec2 aUV;',
+      'uniform mat4 uMVP;',
+      'varying vec2 vUV;',
+      'void main() {',
+      '  vUV = aUV;',
+      '  gl_Position = uMVP * vec4(aPos, 0.0, 1.0);',
+      '}'
+    ].join('\n');
+    const fs = [
+      'precision mediump float;',
+      'varying vec2 vUV;',
+      'uniform sampler2D uTex;',
+      'void main() { gl_FragColor = texture2D(uTex, vUV); }'
+    ].join('\n');
+    const compile = (type, src) => {
+      const s = gl.createShader(type);
+      gl.shaderSource(s, src);
+      gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.warn('WebXR shader:', gl.getShaderInfoLog(s));
+      return s;
+    };
+    const prog = gl.createProgram();
+    gl.attachShader(prog, compile(gl.VERTEX_SHADER, vs));
+    gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, fs));
+    gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) console.warn('WebXR link:', gl.getProgramInfoLog(prog));
+
+    this.xrProg = prog;
+    this.xr_aPos = gl.getAttribLocation(prog, 'aPos');
+    this.xr_aUV = gl.getAttribLocation(prog, 'aUV');
+    this.xr_uMVP = gl.getUniformLocation(prog, 'uMVP');
+    this.xr_uTex = gl.getUniformLocation(prog, 'uTex');
+
+    gl.useProgram(prog);
+    gl.uniform1i(this.xr_uTex, 0);
+    gl.enableVertexAttribArray(this.xr_aPos);
+    gl.enableVertexAttribArray(this.xr_aUV);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    gl.disable(gl.DEPTH_TEST);
+  },
+
+  xrRenderFrame(gl, frame) {
+    if (!this.xrSession) return;
+    const pose = frame.getViewerPose(this.xrRefSpace);
+    if (!pose) return;
+    const layer = this.xrBaseLayer || this.xrSession.renderState.baseLayer;
+    if (!layer) return;
+
+    if (this.leftCtx && this.rightCtx) {
+      this.renderEye(this.leftCtx,  -this.eyeSeparation);
+      this.renderEye(this.rightCtx,  this.eyeSeparation);
+    }
+    const srcCanvas = this.leftCanvas;
+
+    const w = Math.max(1, viewW);
+    const h = Math.max(1, viewH);
+    const dist = 3.2;
+    let planeW = 2 * dist * Math.tan(Math.PI * 44 / 180);
+    let planeH = planeW * (h / w);
+    const maxH = 2 * dist * Math.tan(Math.PI * 42 / 180);
+    if (planeH > maxH) { const k = maxH / planeH; planeH *= k; planeW *= k; }
+    const hw = planeW / 2, hh = planeH / 2;
+
+    const verts = this.xrQuad.verts;
+    verts.set([
+      -hw, -hh, -dist, 0, 0,    hw, -hh, -dist, 1, 0,    hw, hh, -dist, 1, 1,
+      -hw, -hh, -dist, 0, 0,    hw, hh, -dist, 1, 1,    -hw, hh, -dist, 0, 1
+    ]);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.xrQuad.buf);
+    gl.bufferData(gl.ARRAY_BUFFER, verts, gl.DYNAMIC_DRAW);
+    gl.useProgram(this.xrProg);
+    gl.vertexAttribPointer(this.xr_aPos, 3, gl.FLOAT, false, 20, 0);
+    gl.vertexAttribPointer(this.xr_aUV,  2, gl.FLOAT, false, 20, 12);
+
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, this.xrQuad.tex);
+    if (srcCanvas && srcCanvas.width > 1) {
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, srcCanvas);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    }
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, layer.framebuffer);
+    gl.clearColor(0.003, 0.003, 0.04, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    for (const view of pose.views) {
+      const vp = layer.getViewport(view);
+      gl.viewport(vp.x, vp.y, vp.width, vp.height);
+      const proj = new Float32Array(view.projectionMatrix);
+      const vmat = new Float32Array(view.transform.matrix);
+      gl.uniformMatrix4fv(this.xr_uMVP, false, XR_MATH.mul(proj, vmat));
+      gl.drawArrays(gl.TRIANGLES, 0, 6);
     }
   },
 
@@ -2255,4 +2377,4 @@ async function boot() {
 window.addEventListener('load', boot);
 </script>
 </body>
-  </html>
+</html>
